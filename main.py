@@ -1,6 +1,7 @@
 from ensemble_analyser import Conformer, get_calculator
 from openbabel import openbabel as ob
 import numpy as np
+import os
 from ase.optimize import LBFGS
 
 
@@ -9,12 +10,6 @@ protocol = {
         'func': 'pbe',
         'basis': 'def2-svp', 
         'opt': False,
-        'freq': False,
-    },
-    1: {
-        'func': 'pbe',
-        'basis': 'def2-svp', 
-        'opt': True,
         'freq': False,
     }
 }
@@ -30,13 +25,9 @@ def _parse_xyz_str(fl):
     return np.array(atoms),np.array(geom, dtype=float)
 
 def convert_file(file):
-    conv = ob.OBConversion()
-    conv.SetInAndOutFormats(file.split('.')[-1].lower(), "xyz")
-    mol = ob.OBMol()
-    conv.ReadFile(mol, file)
-
-    # Convert Mol to RDKit Mol
-    return conv.WriteString(mol)
+    output = '_'.join(file.split('.')[:-1])+'.xyz'
+    os.system(f'obabel {file} -O{output}')
+    return output
 
 
 def read_ensemble(file):
@@ -44,10 +35,10 @@ def read_ensemble(file):
     confs = []
 
     if not file.endswith('.xyz'):
-        fl = convert_file(file)
-    else:
-        with open(file) as f:
-            fl = f.read()
+        file = convert_file(file)
+
+    with open(file) as f:
+        fl = f.read()
 
     fl = fl.splitlines()
     n_atoms = int(fl[0])
@@ -66,7 +57,7 @@ def read_ensemble(file):
 
 
 if __name__ == '__main__':
-    confs = read_ensemble('tests/struct/cluster_water.xyz')
+    confs = read_ensemble('tests/struct/cluster_water_2.mol')
 
     print(confs)
 
@@ -83,3 +74,5 @@ if __name__ == '__main__':
 
     for i in confs:
         print(i.energies)
+
+    os.system('rm ORCA*')
