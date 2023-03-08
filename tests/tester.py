@@ -40,4 +40,5 @@ print(data.writexyz())
 # %%
 
 
-os.remove('ORCA*')
+os.system('rm ORCA*')
+# %%

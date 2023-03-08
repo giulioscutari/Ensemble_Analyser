@@ -10,6 +10,7 @@ class Conformer:
         self.last_geometry = geom
         self.atoms = atoms
         self.energies = {}
+        self.active = True
     
     def get_ase_atoms(self, calc):
         return Atoms(
@@ -19,7 +20,9 @@ class Conformer:
         )
     
     def get_energy(self):
-        return 0
+        en = self.energies[list(self.energies.keys())[-1]]
+        if en['G']: return en['G']
+        return en['E']
     
     def write_xyz(self):
         txt = f'{len(self.atoms)}\nCONFORMER {self.number}\n'
@@ -33,3 +36,16 @@ class Conformer:
     
     def __repr__(self) -> str:
         return self.write_xyz()
+    
+
+
+    # Functions needed for sorting the conformers' ensemble
+
+    def __lt__(self, other):
+        return self.get_energy() < other.get_energy()
+        
+    def __gt__(self, other):
+        return self.get_energy() > other.get_energy()
+        
+    def __eq__(self, other):
+        return self.get_energy() == other.get_energy()
