@@ -8,7 +8,7 @@ def cut_over_thr_max(confs: list, thrGMAX: float) -> list:
 
     """
 
-    ens = np.array([i.get_energy() for i in confs])
+    ens = np.array([i.get_energy for i in confs])
     ens = (ens-min(ens))*627.51
     remov_confs = np.array(confs)[ens > thrGMAX]
     for i in remov_confs:
@@ -17,7 +17,7 @@ def cut_over_thr_max(confs: list, thrGMAX: float) -> list:
 
 
 def check(check, conf_ref, thrs) -> None:
-    if (check.get_energy() - conf_ref.get_energy() < thrs['thrG'] and check.rotatory - conf_ref.rotatory < thrs['thrB']):
+    if (check.get_energy - conf_ref.get_energy < thrs['thrG'] and check.rotatory - conf_ref.rotatory < thrs['thrB']):
         check.active = False
         print(check.number, check.active, 'check')
 

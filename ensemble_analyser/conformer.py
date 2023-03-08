@@ -19,6 +19,11 @@ class Conformer:
             calculator=calc
         )
     
+    @property
+    def rotatory(self):
+        return self.energies[list(self.energies.keys())[-1]]['B']
+
+    @property
     def get_energy(self):
         en = self.energies[list(self.energies.keys())[-1]]
         if en['G']: return en['G']
@@ -42,10 +47,10 @@ class Conformer:
     # Functions needed for sorting the conformers' ensemble
 
     def __lt__(self, other):
-        return self.get_energy() < other.get_energy()
+        return self.get_energy < other.get_energy
         
     def __gt__(self, other):
-        return self.get_energy() > other.get_energy()
+        return self.get_energy > other.get_energy
         
     def __eq__(self, other):
-        return self.get_energy() == other.get_energy()
+        return self.get_energy == other.get_energy
