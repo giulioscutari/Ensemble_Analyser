@@ -1,0 +1,12 @@
+{
+    "0": {
+        "func": "pbe",
+        "basis": "3-21g",
+        "opt": true,
+        "freq": false,
+        "solv" : {
+            "solv": null,
+            "smd" : false
+        }
+    }
+}
