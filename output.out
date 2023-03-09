@@ -1,37 +1,58 @@
+# Reading protocol and threshold files
 Loading Protocol
 
 0: HF/3-21G
- 	thrG    : 0.5 kcal/mol
+ 	thrG    : 1.5 kcal/mol
 	thrB    : 0.5 cm-1
 	thrGMAX : 2.5 kcal/mol
 
 1: B3LYP/3-21G
- 	thrG    : 0.5 kcal/mol
+ 	thrG    : 1.5 kcal/mol
 	thrB    : 0.5 cm-1
 	thrGMAX : 2.5 kcal/mol
 
 
+# Reading ensemble file
 STARTING PROTOCOL 0
 Running PROTOCOL 0-th CONF1
 Running PROTOCOL 0-th CONF2
 
-CONFS     	E[Eh]     	G[Eh]     	B[cm-1]   
+CONFS     	E[kcal/mol]	G[kcal/mol]	B[cm-1]   
 CONF  1	 -215018.91120	 0.00000	 0.16767
 CONF  2	 -215017.32413	 0.00000	 0.16765
 
-Getting number of conformers lying out of the energy windows (over 2.5 kcal/mol) - 1
-2 - 995.9031658069187
+Getting number of conformers lying out of the energy windows (over 2.5 kcal/mol) - 0
 
+
+
+2 VS 1: ∆Energy = 1.5870713866024744 - ∆B = -1.3226326497223218e-05
+1: {0: {'E': -215018.91120157752, 'G': None, 'B': 0.16766605363340548, 'm': 0.8454497956709197}} -- True
+2: {0: {'E': -215017.32413019091, 'G': None, 'B': 0.16765282730690825, 'm': 0.8551447012055913}} -- True
+Saving snapshot of the ensemble
+===============
+END PROTOCOL 0
+===============
 
 
 STARTING PROTOCOL 1
 Running PROTOCOL 1-st CONF1
+Running PROTOCOL 1-st CONF2
 
-CONFS     	E[Eh]     	G[Eh]     	B[cm-1]   
+CONFS     	E[kcal/mol]	G[kcal/mol]	B[cm-1]   
 CONF  1	 -216268.04074	 0.00000	 0.16767
+CONF  2	 -216266.46336	 0.00000	 0.16765
 
-Getting number of conformers lying out of the energy windows (over 2.5 kcal/mol) - 1
-2 - 784837.1822839455
+Getting number of conformers lying out of the energy windows (over 2.5 kcal/mol) - 0
 
 
 
+2 VS 1: ∆Energy = 1.577388918347424 - ∆B = -1.3226326497223218e-05
+1: {0: {'E': -215018.91120157752, 'G': None, 'B': 0.16766605363340548, 'm': 0.8454497956709197}, 1: {'E': -216268.04074392447, 'G': None, 'B': 0.16766605363340548, 'm': 0.6901901072892888}} -- True
+2: {0: {'E': -215017.32413019091, 'G': None, 'B': 0.16765282730690825, 'm': 0.8551447012055913}, 1: {'E': -216266.46335500613, 'G': None, 'B': 0.16765282730690825, 'm': 0.7031544980301271}} -- True
+Saving snapshot of the ensemble
+===============
+END PROTOCOL 1
+===============
+
+
+Saving snapshot of the ensemble

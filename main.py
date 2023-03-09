@@ -66,14 +66,16 @@ def main(ensemble: str, protocol_file: str | None, threshold_file: str | None):
 
         confs = sorted(confs)
 
-        log.info(f'\n{"CONFS":<10s}\t{"E[Eh]":<10s}\t{"G[Eh]":<10s}\t{"B[cm-1]":<10s}')
+        log.info(f'\n{"CONFS":<10s}\t{"E[kcal/mol]":<10s}\t{"G[kcal/mol]":<10s}\t{"B[cm-1]":<10s}')
         for i in confs:
             if not i.active: continue
-            log.debug('Creating the OUTPUT for each conformer calculated')
+            # log.debug('Creating the OUTPUT for each conformer calculated')
             log.info(i.create_log())
 
         confs = check_ensemble(confs, p)
         save_snapshot(f'ensemble_after_{p.number}.xyz', confs)
+
+        log.info(f'{"="*15}\nEND PROTOCOL {p.number}\n{"="*15}\n\n')
 
     save_snapshot('final_ensemble.xyz', confs)
 

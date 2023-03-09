@@ -5,10 +5,10 @@ from .logger import log
 def cut_over_thr_max(confs: list, thrGMAX: float) -> list:
 
 
-    ens = np.array([i.get_energy for i in confs])
-    ens = (ens-min(ens))*627.51
-    print(ens)
-    remov_confs = np.array(confs)[ens > thrGMAX]
+    ens = np.array([i.get_energy for i in confs if i.active])
+    ens = ens-min(ens)
+
+    remov_confs = np.array([i for i in confs if i.active])[ens > thrGMAX]
     log.info(f'\nGetting number of conformers lying out of the energy windows (over {thrGMAX} kcal/mol) - {len(remov_confs)}')
     for idx, i in enumerate(list(remov_confs)):
         i.active = False
@@ -17,7 +17,9 @@ def cut_over_thr_max(confs: list, thrGMAX: float) -> list:
 
 def check(check, conf_ref, protocol) -> None:
 
-    if (check.get_energy - conf_ref.get_energy < (protocol.thrG / 627.51) and check.rotatory - conf_ref.rotatory < protocol.thrB):
+
+    log.debug(f'{check.number} VS {conf_ref.number}: ∆Energy = {check.get_energy - conf_ref.get_energy} - ∆B = {check.rotatory - conf_ref.rotatory}')
+    if (check.get_energy - conf_ref.get_energy < protocol.thrG  and check.rotatory - conf_ref.rotatory < protocol.thrB):
         check.active = False
         check.diactivated_by = conf_ref.number
         log.info(f'{check.number} deactivated by {conf_ref.number}. {check.moment:.4f} - {conf_ref.moment:.4f}')
@@ -34,6 +36,7 @@ def check_ensemble(confs, protocol) -> list:
         if not i.active: continue # Not check the non active conformers
 
         for j in range(0, idx):
+            print('check ', j, idx)
             check(i, confs[j], protocol)
             # rmsd(i.last_geometry, confs[j].last_geometry)
 

@@ -133,7 +133,7 @@ class Protocol:
         )
 
 
-        log.debug(f'# Parameters of calculator: {calculator.parameters}\n')
+        # log.debug(f'# Parameters of calculator: {calculator.parameters}\n')
 
         return calculator
 

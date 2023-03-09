@@ -3,7 +3,7 @@ import os
 
 LOG_FORMAT = "%(message)s"
 
-DEBUG = False # os.getenv('DEBUG')
+DEBUG = os.getenv('DEBUG')
 
 logging.basicConfig(
     filename='output.out',
