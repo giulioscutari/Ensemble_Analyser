@@ -22,6 +22,10 @@ class Conformer:
     @property
     def rotatory(self):
         return self.energies[list(self.energies.keys())[-1]]['B']
+    
+    @property
+    def moment(self):
+        return self.energies[list(self.energies.keys())[-1]]['m']
 
     @property
     def get_energy(self):
@@ -29,12 +33,26 @@ class Conformer:
         if en['G']: return en['G']
         return en['E']
     
+    @property
+    def _last_energy(self):
+        return self.energies[list(self.energies.keys())[-1]]
+        
     def write_xyz(self):
-        txt = f'{len(self.atoms)}\nCONFORMER {self.number}\n'
+        if not self.active: return ''
+        txt = f'{len(self.atoms)}\nCONFORMER {self.number} {"G : {:.6f} Eh".format(self._last_energy["G"]) if self._last_energy["G"] else "E : {:.6f} Eh".format(self._last_energy["E"])}\n'
         for a, pos in zip(self.atoms, self.last_geometry):
             x, y, z = pos
             txt += f' {a}\t{x:14f}\t{y:14f}\t{z:14f}\n'
         return txt.strip()
+
+
+    def create_log(self):
+        e, g, b, m = self._last_energy.values()
+        if not g: g = 0
+        txt = 'CONF{:3n}\t {:.5f}\t {:.5f}\t {:.5f}'.format(self.number, e, g, b)
+        return txt 
+
+
 
     def __str__(self) -> str:
         return self.write_xyz()

@@ -1,0 +1,37 @@
+Loading Protocol
+
+0: HF/3-21G
+ 	thrG    : 0.5 kcal/mol
+	thrB    : 0.5 cm-1
+	thrGMAX : 2.5 kcal/mol
+
+1: B3LYP/3-21G
+ 	thrG    : 0.5 kcal/mol
+	thrB    : 0.5 cm-1
+	thrGMAX : 2.5 kcal/mol
+
+
+STARTING PROTOCOL 0
+Running PROTOCOL 0-th CONF1
+Running PROTOCOL 0-th CONF2
+
+CONFS     	E[Eh]     	G[Eh]     	B[cm-1]   
+CONF  1	 -215018.91120	 0.00000	 0.16767
+CONF  2	 -215017.32413	 0.00000	 0.16765
+
+Getting number of conformers lying out of the energy windows (over 2.5 kcal/mol) - 1
+2 - 995.9031658069187
+
+
+
+STARTING PROTOCOL 1
+Running PROTOCOL 1-st CONF1
+
+CONFS     	E[Eh]     	G[Eh]     	B[cm-1]   
+CONF  1	 -216268.04074	 0.00000	 0.16767
+
+Getting number of conformers lying out of the energy windows (over 2.5 kcal/mol) - 1
+2 - 784837.1822839455
+
+
+

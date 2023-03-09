@@ -1,11 +1,21 @@
 {
     "0": {
-        "func": "pbe",
+        "func": "HF",
         "basis": "3-21g",
-        "opt": true,
+        "opt": false,
         "freq": false,
         "solv" : {
-            "solv": null,
+            "solvent": null,
+            "smd" : false
+        }
+    },
+    "1": {
+        "func": "b3lyp",
+        "basis": "3-21g",
+        "opt": false,
+        "freq": false,
+        "solv" : {
+            "solvent": null,
             "smd" : false
         }
     }
