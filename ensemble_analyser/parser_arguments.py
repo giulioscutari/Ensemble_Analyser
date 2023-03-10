@@ -9,22 +9,22 @@ def print_help_protocol():
 
     example = json.dumps(
         {
-            "0": {
+        "0": {
                 "func": "str: DEFINE THE DFT FUNCTIONAL",
                 "basis": "str: DEFINE THE BASIS SET FOR THE CALCULATION. DEFAULT: def2-svp",
-                "opt": "bool: TRUE IF WANT TO OPTIMISE. DEFAULT: False",
-                "freq": "bool: TRUE IF WANT ANALYTICAL FREQUENCY CALCULATION. Defaul: False",
-                "solv" : {
-                    "solvent": 'str|null: NAME OF THE SOLVENT. IF GAS PHASE DEFINE AS NULL',
-                    "smd" : 'bool: TRUE IF SMD MODEL EMPLOYED FOR IMPLICIT CALCULATION, ELSE CPCM USE',
-                    '_comment' : 'SOLV KEYWORD CAN BE OMMITED AND A GAS PHASE CALCULATION WILL BE CARRIED.'
-                    }, 
-                "add_input" : "str: ADDITIONAL INPUT TO BE PASSED TO THE CALCULATOR. NO SANITY CHECK ON THIS BLOCK! USE WITH CARE. DEFAULT null"
-                },
+                "opt": "bool: TRUE IF WANT TO OPTIMIZE. DEFAULT: False",
+                "freq": "bool: TRUE IF WANT ANALYTICAL FREQUENCY CALCULATION. DEFAULT: False",
+                "solv": {
+                    "solvent": "str|null: NAME OF THE SOLVENT. IF GAS PHASE DEFINE AS NULL",
+                    "smd": "bool: TRUE IF SMD MODEL EMPLOYED FOR IMPLICIT CALCULATION, ELSE CPCM USE",
+                    "_comment": "SOLV KEYWORD CAN BE OMITTED, AND A GAS PHASE CALCULATION WILL BE CARRIED OUT."
+                    },
+                "add_input": "str: ADDITIONAL INPUT TO BE PASSED TO THE CALCULATOR. NO SANITY CHECK ON THIS BLOCK! USE WITH CARE. DEFAULT null"
+            }
         }, indent=4
     ) 
 
-    txt = f'The protocol file must be a JSON file and it can contains as many calculation parts as it is desidable. These calculations can be mere single point, optimisations, solo frequency or optimisation-frequency calculations. The JSON file is formatted as follow, note that ONLY "func" and "solvent" (if used the solv keyword) are mandatory:\n{example}\n'
+    txt = f'The protocol file must be a JSON file and it can contain as many calculation parts as desired. These calculations can be single-point, optimizations, solo frequency, or optimization-frequency calculations. The JSON file is formatted as follows. Note that only "func" and "solvent" (if the "solv" keyword is used) are mandatory:\n{example}'
 
     print(txt)
     sys.exit()
@@ -35,7 +35,7 @@ def print_help_threshold():
         contents = json.loads(j.read())
     example = json.dumps(contents, indent=4)
 
-    txt = f'With this JSON file the different pruning parameters can be change. USE WITH CARE!\n\nIn here all "type" of calculations possibile hade differents thrasholds:\n\t- thrG: refers to the energy (G or E) threshold to consider two conformers equivalntes togheter with thrB\n\t- thrB: refers to the rotary constant threshold to to consider two conformers equivalntes togheter with thrG\n\t- thrGMAX: refers to the max energy windows considered. Conformers lying above it will be sorted out immediately\n\nTwo conformers are equivalent if G_(CONFi)-G(CONFi-1)<thrG AND B_(CONFi)-B_(CONFi-1)<thrB.\n\nThe default parametes are:\n{example}\n\nIf you want to change only some of the parameters, ALL parameters must be passed.\nDO NOT CHANGE THE KEYWORDS'
+    txt = f'With this JSON file, different pruning parameters can be changed. USE WITH CARE!\n\Here, different types of calculations have different thresholds:\n\t- thrG: Refers to the energy (G or E) threshold to consider two conformers equivalent together with thrB.\n\t- thrB: Refers to the rotary constant threshold to consider two conformers equivalent together with thrG.\n\t- thrGMAX: Refers to the maximum energy window considered. Conformers lying above it will be sorted out immediately.\n\nTwo conformers are considered equivalent if G_(CONFi)-G(CONFi-1) < thrG AND B_(CONFi)-B_(CONFi-1) < thrB.\n\nThe default parametes are:\n{example}\n\nIf you want to change only some of the parameters, ALL parameters must be passed.\nDO NOT CHANGE THE KEYWORDS'
 
     print(txt)
     sys.exit()
