@@ -1,6 +1,5 @@
 import cclib, re
 import numpy as np
-from .logger import log
 
 def parse_rotational_const(x):
     if re.search('Rotational constants in cm-1', x):

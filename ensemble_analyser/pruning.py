@@ -1,8 +1,7 @@
 from rmsd import quaternion_rmsd as rmsd
 import numpy as np
-from .logger import log
 
-def cut_over_thr_max(confs: list, thrGMAX: float) -> list:
+def cut_over_thr_max(confs: list, thrGMAX: float, log) -> list:
 
 
     ens = np.array([i.get_energy for i in confs if i.active])
@@ -15,7 +14,7 @@ def cut_over_thr_max(confs: list, thrGMAX: float) -> list:
         log.info(f'{i.number} - {ens[confs.index(i)]}')
     log.info('\n\n')
 
-def check(check, conf_ref, protocol) -> None:
+def check(check, conf_ref, protocol, log) -> None:
 
 
     log.debug(f'{check.number} VS {conf_ref.number}: ∆Energy = {check.get_energy - conf_ref.get_energy} - ∆B = {check.rotatory - conf_ref.rotatory}')
@@ -28,16 +27,16 @@ def check(check, conf_ref, protocol) -> None:
 
 
 
-def check_ensemble(confs, protocol) -> list:
+def check_ensemble(confs, protocol, log) -> list:
 
-    cut_over_thr_max(confs, protocol.thrGMAX)
+    cut_over_thr_max(confs, protocol.thrGMAX, log)
 
     for idx, i in enumerate(confs):
         if not i.active: continue # Not check the non active conformers
 
         for j in range(0, idx):
             print('check ', j, idx)
-            check(i, confs[j], protocol)
+            check(i, confs[j], protocol, log)
             # rmsd(i.last_geometry, confs[j].last_geometry)
 
     log.debug('\n'.join([f'{i.number}: {i.energies} -- {i.active}' for i in confs]))

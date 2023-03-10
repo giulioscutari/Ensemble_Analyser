@@ -3,7 +3,7 @@ import sys
 from ase.calculators.orca import ORCA
 
 try:
-    from .logger import log, ordinal
+    from .logger import ordinal
 except ModuleNotFoundError:
     pass
 
@@ -139,13 +139,13 @@ class Protocol:
 
 
 
-def create_protocol(p, thrs):
+def create_protocol(p, thrs, log):
     protocol = []
 
     log.info('Loading Protocol\n')
     for idx, d in p.items():
         func    = d.get('func', None)
-        basis   = d.get('basis', '')
+        basis   = d.get('basis', 'def2-svp')
         opt     = d.get('opt', False)
         freq    = d.get('freq', False)
 
@@ -156,7 +156,7 @@ def create_protocol(p, thrs):
 
         if not func:
             log.critical(f"{'='*20}\nCRITICAL ERROR\n{'='*20}\nFUNC key must be passed in order to calculate energy. DFT functional or HF for Hartree-Fock calculation or semi-empirical methods (XTB1/XTB2/PM3/AM1 or similar supported by the calculator) (Probelm at {ordinal(int(idx))} protocol definition)\n{'='*20}\n")
-            sys.exit()
+            raise IOError('There is an error in the input file with the definition of the functional. See the output file.')
 
         protocol.append(Protocol(number =idx, functional=func, basis=basis, solvent= solv, opt= opt, freq= freq, add_input= add_input, thrs_json= thrs))
 
