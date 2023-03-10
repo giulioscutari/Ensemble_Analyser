@@ -67,6 +67,10 @@ def parser_arguments():
     help_group.add_argument('-h-p', '--help-protocol', help='Get help to format correcly the protocol JSON-file', action='store_true')
     help_group.add_argument('-h-t', '--help-threshold', help='Get help to format correcly the threshold JSON-file', action='store_true')
 
+
+    if __name__ == '__main__': 
+        parser.print_help()
+
     a = sys.argv
     if '-h-p' in a or '--help-protocol' in a:
         return print_help_protocol()
