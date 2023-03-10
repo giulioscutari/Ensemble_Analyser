@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import cclib, re
 import numpy as np
 

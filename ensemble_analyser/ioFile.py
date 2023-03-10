@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 from .conformer import Conformer
 import os
 import numpy as np

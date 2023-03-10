@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import ase
 from ase.optimize import LBFGS
 

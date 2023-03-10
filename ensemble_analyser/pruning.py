@@ -1,4 +1,6 @@
-from rmsd import quaternion_rmsd as rmsd
+#!/usr/bin/python3
+
+# from rmsd import quaternion_rmsd as rmsd
 import numpy as np
 
 def cut_over_thr_max(confs: list, thrGMAX: float, log) -> list:

@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import json, os
 import sys
 from ase.calculators.orca import ORCA
