@@ -13,11 +13,11 @@ except ModuleNotFoundError:
 DEBUG = os.getenv('DEBUG')
 
 
-def load_protocol(file:str | None):
+def load_protocol(file:str ):
     default = 'ensemble_analyser/parameters_file/default_protocol.json'
     return json.load(open(default if not file else file ))
 
-def load_threshold(file:str | None):
+def load_threshold(file:str ):
     default = 'ensemble_analyser/parameters_file/default_threshold.json'
     return json.load(open(default if not file else file ))
 
@@ -53,7 +53,7 @@ class Solvent:
 
 class Protocol: 
 
-    def __init__(self, number:int, functional:str, basis:str, solvent:Solvent|None, opt:bool, freq:bool, add_input:str | None, thrs_json, calculator='orca'):
+    def __init__(self, number:int, functional:str, basis:str, solvent:Solvent, opt:bool, freq:bool, add_input:str , thrs_json, calculator='orca'):
 
         self.number = number
         self.functional = functional.upper()

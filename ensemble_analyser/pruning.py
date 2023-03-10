@@ -23,9 +23,10 @@ def check(check, conf_ref, protocol, log) -> None:
     if (check.get_energy - conf_ref.get_energy < protocol.thrG  and check.rotatory - conf_ref.rotatory < protocol.thrB):
         check.active = False
         check.diactivated_by = conf_ref.number
-        log.info(f'{check.number} deactivated by {conf_ref.number}. {check.moment:.4f} - {conf_ref.moment:.4f}')
+        log.info(f'{check.number} deactivated by {conf_ref.number}. ENERGY\t{check.get_energy:.4f} - {conf_ref.get_energy:.4f}\tDIPOL MOMENTS\t{check.moment:.4f} - {conf_ref.moment:.4f}')
+        return True
 
-    return None
+    return False
 
 
 
@@ -35,13 +36,13 @@ def check_ensemble(confs, protocol, log) -> list:
 
     for idx, i in enumerate(confs):
         if not i.active: continue # Not check the non active conformers
-
         for j in range(0, idx):
             print('check ', j, idx)
-            check(i, confs[j], protocol, log)
+            if check(i, confs[j], protocol, log): 
+                break
             # rmsd(i.last_geometry, confs[j].last_geometry)
 
-    log.debug('\n'.join([f'{i.number}: {i.energies} -- {i.active}' for i in confs]))
+    log.debug('\n'.join([f'{i.number}: {i._last_energy} -- {i.active}' for i in confs]))
 
 
     return confs

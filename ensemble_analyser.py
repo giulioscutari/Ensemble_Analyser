@@ -49,7 +49,7 @@ def launch(conf, protocol, cpu, log):
     get_conf_parameters(conf, protocol.number)
     
 
-def main(ensemble: str, protocol_file: str | None, threshold_file: str | None, cpu:int, output):
+def main(ensemble: str, protocol_file: str , threshold_file: str , cpu:int, output):
 
     log = create_log(output)
 
@@ -65,7 +65,7 @@ def main(ensemble: str, protocol_file: str | None, threshold_file: str | None, c
     for p in protocol:
 
         log.info(f'STARTING PROTOCOL {p.number}')
-
+        log.info(f'\nActive conformers for this phase: {len([i for i in confs if i.active])}\n')
         for i in confs:
             if not i.active: continue
             launch(i, p, cpu, log)
