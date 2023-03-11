@@ -25,7 +25,7 @@ python ensemble_analyser.py -h-p # to obtain an example of the protocol.json fil
 python ensemble_analyser.py -h-t # to obtain an example of the treshold.json file
 ```
 
-Next, run the prune.py script with the path to the JSON file as a command-line argument. The script will read the input file, perform the conformer pruning, and output a file with the pruned conformers.
+Next, run the `ensemble_analyser.py` script with the path to the JSON file as a command-line argument. The script will read the input file, perform the conformer pruning, and output a file with the pruned conformers.
 
 ```bash
 python ensemble_analyser.py ensemble.xyz

@@ -47,7 +47,13 @@ def print_help_threshold():
 
 def parser_arguments():
 
-    parser = argparse.ArgumentParser(add_help=False)
+    parser = argparse.ArgumentParser(
+        prog='Ensemble Analyser',
+        description="Quickly and easily identify the most important conformers and reduce the computational time",
+        add_help=False
+        )
+
+
 
     # ensemble file
     input_group = parser.add_argument_group('Input Files')

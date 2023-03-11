@@ -19,14 +19,15 @@ from ensemble_analyser.parser_arguments import parser_arguments
 
 def launch(conf, protocol, cpu, log):
     
-    log.info(f'Running PROTOCOL {ordinal(int(protocol.number))} CONF{conf.number}')
+    log.info(f'Running {ordinal(int(protocol.number))} PROTOCOL -> CONF{conf.number}')
     try:
         if protocol.opt:
             calculator = protocol.get_calculator(cpu=cpu, opt=True)
             atm = conf.get_ase_atoms(calculator)
-            opt = LBFGS(atm, logfile='ORCA_ase.log', trajectory='ORCA_ase.trj')
-            opt.run()
-            conf.last_geometry = opt.atoms.get_positions()
+            atm.get_potential_energy()
+            # opt = LBFGS(atm, logfile='ORCA_ase.log', trajectory='ORCA_ase.trj')
+            # opt.run()
+            conf.last_geometry = atm.get_positions()
 
         if protocol.freq:
             calculator = protocol.get_calculator(cpu=cpu)
@@ -84,6 +85,7 @@ def main(ensemble: str, protocol_file: str , threshold_file: str , cpu:int, outp
         log.info(f'{"="*15}\nEND PROTOCOL {p.number}\n{"="*15}\n\n')
 
     save_snapshot('final_ensemble.xyz', confs, log)
+    log.info(f'{"="*15}\nCALCULATIONS ENDED\n{"="*15}\n\n')
 
     return None
 

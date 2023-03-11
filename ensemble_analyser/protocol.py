@@ -66,6 +66,10 @@ class Protocol:
         self.calculator = calculator
 
     @property
+    def calculation_level(self):
+        return LEVEL_DEFINITION[self.number_level].upper()
+
+    @property
     def level(self):
         return f'{self.functional}/{self.basis}' + (str(self.solvent) if self.solvent else '')
     
@@ -117,7 +121,7 @@ class Protocol:
 
         # ! B3LYP def2-SVP FREQ CPCM(solvent) ENGRAD
         # the optimisation is carried by ASE, ORCA is a gradient engine
-        simple_input = f'{self.functional} {self.basis} {"freq" if freq else ""}{solv}'
+        simple_input = f'{self.functional} {self.basis} {"freq" if freq else ""}{"opt" if opt else ""}{solv}'
 
 
         # %cpcm
@@ -130,8 +134,8 @@ class Protocol:
         calculator = ORCA(
         label = "ORCA",
         orcasimpleinput = simple_input,
-        orcablocks=(f'%pal nprocs {cpu} end ' if not DEBUG else '') + smd,
-        charge = charge, mult=mult, task='gradient'
+        orcablocks=f'%pal nprocs {cpu} end ' + smd,
+        charge = charge, mult=mult, task='energy'
         )
 
 
@@ -162,7 +166,7 @@ def create_protocol(p, thrs, log):
 
         protocol.append(Protocol(number =idx, functional=func, basis=basis, solvent= solv, opt= opt, freq= freq, add_input= add_input, thrs_json= thrs))
 
-    log.info('\n'.join((f"{i.number}: {str(i)}\n {i.thr}" for i in protocol)) + '\n')
+    log.info('\n'.join((f"{i.number}: {str(i)} - {i.calculation_level}\n {i.thr}" for i in protocol)) + '\n')
     return protocol
     #{'charge': 0, 'mult': 1, 'task': 'gradient', 'orcasimpleinput': 'B3LYP def2-svp ', 'orcablocks': ''}
 
