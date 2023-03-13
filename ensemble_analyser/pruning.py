@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-# from rmsd import quaternion_rmsd as rmsd
+from rmsd import quaternion_rmsd as rmsd
 import numpy as np
 
 from .logger import save_snapshot, DEBUG
@@ -23,7 +23,7 @@ def check(check, conf_ref, protocol, log) -> None:
     if not conf_ref.active:
         return False
 
-    log.debug(f'{check.number} VS {conf_ref.number}: ∆Energy = {check.get_energy - conf_ref.get_energy} - ∆B = {check.rotatory - conf_ref.rotatory}')
+    log.debug(f'{check.number} VS {conf_ref.number}: ∆Energy = {check.get_energy - conf_ref.get_energy} - ∆B = {check.rotatory - conf_ref.rotatory} - RMSD = {rmsd(check.last_geometry, conf_ref.last_geometry)}')
 
     
     if (check.get_energy - conf_ref.get_energy < protocol.thrG  and check.rotatory - conf_ref.rotatory < protocol.thrB):
@@ -48,7 +48,6 @@ def check_ensemble(confs, protocol, log) -> list:
             print('check ', j, idx)
             if check(i, confs[j], protocol, log): 
                 break
-            # rmsd(i.last_geometry, confs[j].last_geometry)
 
     log.debug('\n'.join([f'{i.number}: {i._last_energy} -- {i.active}' for i in confs]))
 
