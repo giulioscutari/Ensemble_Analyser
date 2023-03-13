@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
-
 import os
-from ensemble_analyser.protocol import create_protocol
 
+
+from ensemble_analyser.protocol import create_protocol
 from ensemble_analyser.pruning import check_ensemble
 from ensemble_analyser.ioFile import read_ensemble
 from ensemble_analyser.logger import save_snapshot, create_log

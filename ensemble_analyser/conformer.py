@@ -67,10 +67,13 @@ class Conformer:
     # Functions needed for sorting the conformers' ensemble
 
     def __lt__(self, other):
+        if not self.active: return 0 < other.get_energy
         return self.get_energy < other.get_energy
         
     def __gt__(self, other):
+        if not self.active: return 0 > other.get_energy
         return self.get_energy > other.get_energy
         
     def __eq__(self, other):
+        if not self.active: return 0 == other.get_energy
         return self.get_energy == other.get_energy
