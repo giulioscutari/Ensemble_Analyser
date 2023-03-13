@@ -1,54 +1,18 @@
 #!/usr/bin/python3
 
-import ase
-from ase.optimize import LBFGS
 
-
-import sys, os, cclib
+import os
 from ensemble_analyser.protocol import create_protocol
 
 from ensemble_analyser.pruning import check_ensemble
 from ensemble_analyser.ioFile import read_ensemble
-from ensemble_analyser.parser_parameter import get_conf_parameters
-from ensemble_analyser.logger import save_snapshot, create_log, ordinal
+from ensemble_analyser.logger import save_snapshot, create_log
 from ensemble_analyser.protocol import load_threshold, load_protocol
 from ensemble_analyser.parser_arguments import parser_arguments
+from ensemble_analyser.launch import launch
 
 
 
-
-def launch(conf, protocol, cpu, log):
-    
-    log.info(f'Running {ordinal(int(protocol.number))} PROTOCOL -> CONF{conf.number}')
-    try:
-        if protocol.opt:
-            calculator = protocol.get_calculator(cpu=cpu, opt=True)
-            atm = conf.get_ase_atoms(calculator)
-            atm.get_potential_energy()
-            # opt = LBFGS(atm, logfile='ORCA_ase.log', trajectory='ORCA_ase.trj')
-            # opt.run()
-            conf.last_geometry = atm.get_positions()
-
-        if protocol.freq:
-            calculator = protocol.get_calculator(cpu=cpu)
-            atm = conf.get_ase_atoms(calculator)
-            atm.get_potential_energy()
-
-        if not (protocol.opt and protocol.freq):
-            calculator = protocol.get_calculator(cpu=cpu)
-            atm = conf.get_ase_atoms(calculator)
-            atm.get_potential_energy()
-
-    except ase.calculators.calculator.CalculationFailed:
-        log.error(f'Calulator error.')
-        with open('ORCA.out') as f:
-            fl = f.read()
-        log.error('\n'.join(fl.splitlines()[-6:-3]))
-        raise RuntimeError('Some sort of error have been encountered during the calculation of the calcultor.')
-
-
-    get_conf_parameters(conf, protocol.number)
-    
 
 def main(ensemble: str, protocol_file: str , threshold_file: str , cpu:int, output):
 
