@@ -37,7 +37,7 @@ def main(ensemble: str, protocol_file: str , threshold_file: str , cpu:int, outp
 
         confs = sorted(confs)
 
-        log.info(f'\n{"CONFS":<10s}\t{"E[kcal/mol]":<10s} \t{"G[kcal/mol]":<10s} \t{"B[cm-1]":<10s}')
+        log.info(f'\n{"CONFS":3s}\t{"E[kcal/mol]":<10s} \t{"G[kcal/mol]":<10s} \t{"B[cm-1]":<10s}')
         for i in confs:
             if not i.active: continue
             # log.debug('Creating the OUTPUT for each conformer calculated')
