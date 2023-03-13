@@ -3,6 +3,8 @@
 # from rmsd import quaternion_rmsd as rmsd
 import numpy as np
 
+from .logger import save_snapshot, DEBUG
+
 def cut_over_thr_max(confs: list, thrGMAX: float, log) -> list:
 
 
@@ -37,6 +39,8 @@ def check(check, conf_ref, protocol, log) -> None:
 def check_ensemble(confs, protocol, log) -> list:
 
     cut_over_thr_max(confs, protocol.thrGMAX, log)
+
+    if DEBUG: save_snapshot(f'after_protocol_{protocol.number}_before_check.xyz', confs, log)
 
     for idx, i in enumerate(confs):
         if not i.active: continue # Not check the non active conformers
