@@ -29,7 +29,7 @@ def cut_over_thr_max(confs: list, thrGMAX: float, log) -> list:
 def rmsd(check, ref):
     ref_pos, check_pos = ref.copy(), check.copy()
     minimize_rotation_and_translation(ref_pos, check_pos)
-    return np.sqrt(1/ref.size) * np.linalg.norm(ref_pos-check_pos)
+    return np.sqrt(1/len(ref.get_positions())) * np.linalg.norm(np.array(ref_pos.get_positions())-np.array(check_pos.get_positions()))
 
 
 
@@ -39,12 +39,12 @@ def check(check, conf_ref, protocol, log) -> None:
     if not conf_ref.active:
         return False
 
-    log.debug(f'{check.number} VS {conf_ref.number}: ∆Energy = {check.get_energy - conf_ref.get_energy} - ∆B = {check.rotatory - conf_ref.rotatory} - RMSD = {rmsd(check.get_ase_atoms(), conf_ref.get_ase_atoms())}')
+    log.debug(f'{check.number} VS {conf_ref.number}: ∆Energy = {check.get_energy - conf_ref.get_energy} - ∆B = {abs(check.rotatory - conf_ref.rotatory)} - RMSD = {rmsd(check.get_ase_atoms(), conf_ref.get_ase_atoms())}')
 
-    if (check.get_energy - conf_ref.get_energy < protocol.thrG  and check.rotatory - conf_ref.rotatory < protocol.thrB):
+    if (check.get_energy - conf_ref.get_energy < protocol.thrG  and abs(check.rotatory - conf_ref.rotatory) < protocol.thrB):
         check.active = False
         check.diactivated_by = conf_ref.number
-        log.info(f'{check.number} deactivated by {conf_ref.number}. ENERGY\t{check.get_energy:.4f} - {conf_ref.get_energy:.4f}\tDIPOL MOMENTS\t{check.moment:.4f} - {conf_ref.moment:.4f}')
+        log.info(f'{check.number} deactivated by {conf_ref.number}. ENERGY\t{(check.get_energy - conf_ref.get_energy):.4f}\tDIPOL MOMENTS\t{(check.moment - conf_ref.moment):.4f}')
         return True
 
     return False
@@ -65,8 +65,10 @@ def check_ensemble(confs, protocol, log) -> list:
             print('check ', j, idx)
             if check(i, confs[j], protocol, log): 
                 break
-
-    log.debug('\n'.join([f'{i.number}: {i._last_energy} -- {i.active}' for i in confs]))
+    
+    log.debug('')
+    log.debug('\n'.join([f'{i.number}: {i._last_energy} -- {i.active}' for i in confs if i.active]))
+    log.debug('')
 
     return confs
 
