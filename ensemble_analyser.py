@@ -16,9 +16,13 @@ from ensemble_analyser.launch import launch
 
 
 def calculate_rel_energies(confs):
+    c = [i for i in confs if i.active]
     ens = np.array([i.get_energy for i in confs if i.active])
     ens -= min(ens)
-    
+    for idx, i in enumerate(list(ens)):
+        c[idx]._last_energy['Erel'] = i 
+
+
 
 def main(ensemble: str, protocol_file: str , threshold_file: str , cpu:int, output):
 
@@ -43,9 +47,9 @@ def main(ensemble: str, protocol_file: str , threshold_file: str , cpu:int, outp
 
         confs = sorted(confs)
 
-        rel_energies = calculate_rel_energies(confs)
+        calculate_rel_energies(confs)
 
-        log.info(f'\n{"CONFS":3s}\t{"E[kcal/mol]":<10s} \t{"G[kcal/mol]":<10s} \t{"B[cm-1]":<10s}')
+        log.info(f'\n{"CONFS":3s}\t {"E[kcal/mol]":<10s}\t {"G[kcal/mol]":<10s}\t {"B[cm-1]":<10s}\t {"Relative[kcal/mol]":<15s}')
         for i in confs:
             if not i.active: continue
             # log.debug('Creating the OUTPUT for each conformer calculated')

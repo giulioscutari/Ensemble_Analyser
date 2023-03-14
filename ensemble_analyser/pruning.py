@@ -67,7 +67,7 @@ def check_ensemble(confs, protocol, log) -> list:
                 break
     
     log.debug('')
-    log.debug('\n'.join([f'{i.number}: {i._last_energy} -- {i.active}' for i in confs if i.active]))
+    log.debug('\n'.join([f'{i.number}: {i._last_energy} -- {i.active}' for i in confs ])) #if i.active]))
     log.debug('')
 
     return confs
