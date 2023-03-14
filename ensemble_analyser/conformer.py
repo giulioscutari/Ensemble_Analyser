@@ -48,7 +48,7 @@ class Conformer:
         return txt.strip()
 
     def create_log(self):
-        en = self._last_energy.values()
+        en = self._last_energy
         txt = 'CONF{:3n}\t {:.5f}\t {:.5f}\t {:.5f}\t {:.3s}'.format(self.number, en.get('E', float(0)), en.get('G', float(0)), en.get('B', float(0)), en.get('Erel', float(0)))
         return txt 
 
