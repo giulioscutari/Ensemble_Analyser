@@ -1,9 +1,15 @@
 #!/usr/bin/python3
 
-from rmsd import quaternion_rmsd as rmsd
+from ase.build import minimize_rotation_and_translation
+
 import numpy as np
 
+
 from .logger import save_snapshot, DEBUG
+
+
+
+
 
 def cut_over_thr_max(confs: list, thrGMAX: float, log) -> list:
 
@@ -13,10 +19,20 @@ def cut_over_thr_max(confs: list, thrGMAX: float, log) -> list:
 
     remov_confs = np.array([i for i in confs if i.active])[ens > thrGMAX]
     log.info(f'\nGetting number of conformers lying out of the energy windows (over {thrGMAX} kcal/mol) - {len(remov_confs)}')
-    for idx, i in enumerate(list(remov_confs)):
+    for i in list(remov_confs):
         i.active = False
         log.info(f'{i.number} - {ens[confs.index(i)]}')
-    log.info('\n\n')
+    log.info('\n')
+
+
+
+def rmsd(check, ref):
+    ref_pos, check_pos = ref.copy(), check.copy()
+    minimize_rotation_and_translation(ref_pos, check_pos)
+    return np.sqrt(1/ref.size) * np.linalg.norm(ref_pos-check_pos)
+
+
+
 
 def check(check, conf_ref, protocol, log) -> None:
 
@@ -25,7 +41,6 @@ def check(check, conf_ref, protocol, log) -> None:
 
     log.debug(f'{check.number} VS {conf_ref.number}: ∆Energy = {check.get_energy - conf_ref.get_energy} - ∆B = {check.rotatory - conf_ref.rotatory} - RMSD = {rmsd(check.last_geometry, conf_ref.last_geometry)}')
 
-    
     if (check.get_energy - conf_ref.get_energy < protocol.thrG  and check.rotatory - conf_ref.rotatory < protocol.thrB):
         check.active = False
         check.diactivated_by = conf_ref.number
@@ -33,6 +48,8 @@ def check(check, conf_ref, protocol, log) -> None:
         return True
 
     return False
+
+
 
 
 
@@ -50,7 +67,6 @@ def check_ensemble(confs, protocol, log) -> list:
                 break
 
     log.debug('\n'.join([f'{i.number}: {i._last_energy} -- {i.active}' for i in confs]))
-
 
     return confs
 

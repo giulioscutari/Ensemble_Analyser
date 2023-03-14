@@ -47,9 +47,8 @@ class Conformer:
             txt += f' {a}\t{x:14f}\t{y:14f}\t{z:14f}\n'
         return txt.strip()
 
-
     def create_log(self):
-        e, g, b, m = self._last_energy.values()
+        e, g, b, *_ = self._last_energy.values()
         if not g: g = 0
         txt = 'CONF{:3n}\t {:.5f}\t {:.5f}\t {:.5f}'.format(self.number, e, g, b)
         return txt 

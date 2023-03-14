@@ -2,7 +2,7 @@
     "0": {
         "func": "B3LYP",
         "basis": "def2-SVP",
-        "opt": true,
+        "opt": false,
         "freq": false,
         "solv" : {
             "solvent": "toluene",

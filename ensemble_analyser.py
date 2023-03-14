@@ -2,6 +2,8 @@
 
 import os
 
+import numpy as np
+
 
 from ensemble_analyser.protocol import create_protocol
 from ensemble_analyser.pruning import check_ensemble
@@ -13,6 +15,10 @@ from ensemble_analyser.launch import launch
 
 
 
+def calculate_rel_energies(confs):
+    ens = np.array([i.get_energy for i in confs if i.active])
+    ens -= min(ens)
+    
 
 def main(ensemble: str, protocol_file: str , threshold_file: str , cpu:int, output):
 
@@ -36,6 +42,8 @@ def main(ensemble: str, protocol_file: str , threshold_file: str , cpu:int, outp
             launch(i, p, cpu, log)
 
         confs = sorted(confs)
+
+        rel_energies = calculate_rel_energies(confs)
 
         log.info(f'\n{"CONFS":3s}\t{"E[kcal/mol]":<10s} \t{"G[kcal/mol]":<10s} \t{"B[cm-1]":<10s}')
         for i in confs:
