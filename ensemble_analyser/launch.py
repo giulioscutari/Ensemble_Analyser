@@ -11,32 +11,18 @@ def launch(conf, protocol, cpu, log):
 
     log.info(f'Running {ordinal(int(protocol.number))} PROTOCOL -> CONF{conf.number}')
     try:
-        if protocol.opt:
-            st = time.perf_counter()
+        st = time.perf_counter()
+        if protocol.opt and protocol.freq:
             calculator = protocol.get_calculator(cpu=cpu, opt=True)
             atm = conf.get_ase_atoms(calculator)
             atm.get_potential_energy()
-            # opt = LBFGS(atm, logfile='ORCA_ase.log', trajectory='ORCA_ase.trj')
-            # opt.run()
             conf.last_geometry = atm.get_positions()
-            end = time.perf_counter()
-            print(end-st)
 
-        if protocol.freq:
-            st = time.perf_counter()
-            calculator = protocol.get_calculator(cpu=cpu)
-            atm = conf.get_ase_atoms(calculator)
-            atm.get_potential_energy()
-            end = time.perf_counter()
-            print(end-st)
+        calculator = protocol.get_calculator(cpu=cpu)
+        atm = conf.get_ase_atoms(calculator)
+        atm.get_potential_energy()
 
-        if not (protocol.opt and protocol.freq):
-            st = time.perf_counter()
-            calculator = protocol.get_calculator(cpu=cpu)
-            atm = conf.get_ase_atoms(calculator)
-            atm.get_potential_energy()
-            end = time.perf_counter()
-            print(end-st)
+        end = time.perf_counter()
 
     except ase.calculators.calculator.CalculationFailed:
         log.error(f'Calulator error.')
@@ -46,4 +32,4 @@ def launch(conf, protocol, cpu, log):
         raise RuntimeError('Some sort of error have been encountered during the calculation of the calcultor.')
 
 
-    get_conf_parameters(conf, protocol.number)
+    get_conf_parameters(conf, protocol.number, end-st)

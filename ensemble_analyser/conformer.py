@@ -50,7 +50,7 @@ class Conformer:
     def create_log(self):
         en = self._last_energy
         if not en['G']: en['G'] = 0
-        txt = 'CONF{:3n}\t {:.5f}\t {:.5f}\t\t {:.5f}\t {:.3f}'.format(self.number, en.get('E', float(0)), en.get('G', float(0)), en.get('B', float(0)), en.get('Erel', float(0)))
+        txt = 'CONF{:3n}\t {:.5f}\t {:.5f}\t\t {:.5f}\t {:.3f}\t {}'.format(self.number, en.get('E', float(0)), en.get('G', float(0)), en.get('B', float(0)), en.get('Erel', float(0)), en.get('time'))
         return txt 
 
 
