@@ -41,16 +41,16 @@ def check(check, conf_ref, protocol, controller) -> bool:
 
     l = len(controller)
     controller[l] = {
-        'check'         : check.number,
-        'ref'           : conf_ref.number,
-        '∆E'            : check.get_energy - conf_ref.get_energy,
-        '∆B'            : np.abs(check.rotatory - conf_ref.rotatory),
-        '∆m'            : np.abs(check.moment - conf_ref.moment),
-        'RMSD'          : rmsd(check.get_ase_atoms(), conf_ref.get_ase_atoms()),
+        'Check'         : check.number,
+        'Ref'           : conf_ref.number,
+        '∆E [kcal/mol]' : check.get_energy - conf_ref.get_energy,
+        '∆B [e-3 cm-1]' : np.abs(check.rotatory - conf_ref.rotatory)*10**3,
+        '∆m [Debye]'    : np.abs(check.moment - conf_ref.moment),
+        'RMSD [Å]'      : rmsd(check.get_ase_atoms(), conf_ref.get_ase_atoms()),
         'Deactivate'    : False
     }
 
-    if ( controller[l]['∆E'] < protocol.thrG  and controller[l]['∆B'] < protocol.thrB):
+    if ( controller[l]['∆E [kcal/mol]'] < protocol.thrG  and controller[l]['∆B [e-3 cm-1]']*10**-3 < protocol.thrB):
         check.active = False
         check.diactivated_by = conf_ref.number
         controller[l] = True
