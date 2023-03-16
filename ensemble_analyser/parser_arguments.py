@@ -55,16 +55,20 @@ def parser_arguments():
 
 
 
-    # ensemble file
+
     input_group = parser.add_argument_group('Input Files')
     input_group.add_argument('ensemble', help='The ensemble file. Could be an xyz file (preferably) or other type parsable by OpenBabel')
     input_group.add_argument('-p', '--protocol', help='JSON file containg the computational protocol. Default: %(default)s', default=os.path.join(os.path.dirname(__file__), 'parameters_file','default_protocol.json'))
     input_group.add_argument('-t', '--threshold', help='JSON file containg the threshold divided by calculation type. Default: %(default)s', default=os.path.join(os.path.dirname(__file__), 'parameters_file','default_threshold.json'))
 
+    molecule_group = parser.add_argument_group('Molecule informations')
+    molecule_group.add_argument('-T', '--temperature', help="Define the temperature in Kelvin. Default %(default)s", default=298.15, type=float)
+    molecule_group.add_argument('-c', '--charge', help="Define the charge of the studied system. Default %(default)s", default=0, type=int)
+    molecule_group.add_argument('-m', '--multiplicity', help="Define the multiplicity of the studied system. Default %(default)s", default=1, type=int)
+
     system_group = parser.add_argument_group('System Parameters')
     system_group.add_argument('cpu', type=int, help='Define the number of CPU used by the calculations')
-    system_group.add_argument('-c', '--calculator', help='Define the calculator to use. Default %(default)s', choices=['orca'], default='orca')
-
+    system_group.add_argument('-calc', '--calculator', help='Define the calculator to use. Default %(default)s', choices=['orca'], default='orca')
 
     other_group = parser.add_argument_group('Other Parameters')
     other_group.add_argument('-o', '--output', help='Define the output filename. Defaut: %(default)s', default='output.out')

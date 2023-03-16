@@ -1,21 +1,21 @@
 {
     "0": {
-        "func": "B3LYP",
+        "func": "pbe",
         "basis": "def2-SVP",
         "opt": false,
         "freq": false,
         "solv" : {
-            "solvent": "toluene",
+            "solvent": null,
             "smd" : false
         }
     },
     "1": {
-        "func": "B3LYP",
+        "func": "pbe",
         "basis": "def2-SVP",
         "opt": true,
         "freq": false,
         "solv" : {
-            "solvent": "toluene",
+            "solvent": null,
             "smd" : false
         }
     }

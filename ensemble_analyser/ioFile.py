@@ -18,7 +18,7 @@ def convert_file(file):
     os.system(f'obabel {file} -O{output}')
     return output
 
-def read_ensemble(file):
+def read_ensemble(file, charge, multiplicity):
 
     confs = []
 
@@ -34,7 +34,7 @@ def read_ensemble(file):
     for i in range(0, len(fl)+1, n_atoms+2):
         if i==old_idx: continue
         atoms, geom = _parse_xyz_str(fl[old_idx:i])
-        confs.append(Conformer(i//n_atoms, geom=geom, atoms=atoms))
+        confs.append(Conformer(i//n_atoms, geom=geom, atoms=atoms, charge=charge, mult=multiplicity))
         old_idx = i
 
     return confs

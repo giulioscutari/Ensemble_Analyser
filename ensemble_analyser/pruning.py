@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from ase.build import minimize_rotation_and_translation
-
+from tabulate import tabulate
 import numpy as np
 
 
@@ -34,23 +34,44 @@ def rmsd(check, ref):
 
 
 
-def check(check, conf_ref, protocol, log) -> None:
+def check(check, conf_ref, protocol, controller) -> bool:
 
     if not conf_ref.active:
         return False
 
-    log.debug(f'{check.number} VS {conf_ref.number}: ∆Energy = {check.get_energy - conf_ref.get_energy} - ∆B = {abs(check.rotatory - conf_ref.rotatory)} - RMSD = {rmsd(check.get_ase_atoms(), conf_ref.get_ase_atoms())}')
+    l = len(controller)
+    controller[l] = {
+        'check'         : check.number,
+        'ref'           : conf_ref.number,
+        '∆E'            : check.get_energy - conf_ref.get_energy,
+        '∆B'            : np.abs(check.rotatory - conf_ref.rotatory),
+        '∆m'            : np.abs(check.moment - conf_ref.moment),
+        'RMSD'          : rmsd(check.get_ase_atoms(), conf_ref.get_ase_atoms()),
+        'Deactivate'    : False
+    }
 
-    if (check.get_energy - conf_ref.get_energy < protocol.thrG  and abs(check.rotatory - conf_ref.rotatory) < protocol.thrB):
+    if ( controller[l]['∆E'] < protocol.thrG  and controller[l]['∆B'] < protocol.thrB):
         check.active = False
         check.diactivated_by = conf_ref.number
-        log.info(f'{check.number} deactivated by {conf_ref.number}. ENERGY\t{(check.get_energy - conf_ref.get_energy):.4f}\tDIPOL MOMENTS\t{(check.moment - conf_ref.moment):.4f}')
+        controller[l] = True
         return True
 
     return False
 
 
 
+
+def refactor_dict(controller):
+    
+    if not controller: return {}
+
+    keys = list(controller[0].keys())
+    d = {i : [] for i in keys}
+
+    for i in controller:
+        for j in d:
+            d[j].append(controller[i][j])
+    return d
 
 
 def check_ensemble(confs, protocol, log) -> list:
@@ -59,16 +80,21 @@ def check_ensemble(confs, protocol, log) -> list:
 
     if DEBUG: save_snapshot(f'after_protocol_{protocol.number}_before_check.xyz', confs, log)
 
+    controller = {}
+
     for idx, i in enumerate(confs):
         if not i.active: continue # Not check the non active conformers
         for j in range(0, idx):
             print('check ', j, idx)
-            if check(i, confs[j], protocol, log): 
+            if check(i, confs[j], protocol, controller): 
                 break
     
-    log.debug('')
-    log.debug('\n'.join([f'{i.number}: {i._last_energy} -- {i.active}' for i in confs ])) #if i.active]))
-    log.debug('')
+    
+    controller = refactor_dict(controller)
+
+    log.info('')
+    log.info(tabulate(controller, headers="keys", floatfmt=".3f"))
+    log.info('')
 
     return confs
 

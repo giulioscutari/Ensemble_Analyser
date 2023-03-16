@@ -49,9 +49,9 @@ class Conformer:
 
     def create_log(self):
         en = self._last_energy
-        if not en['G']: en['G'] = 0
-        txt = 'CONF{:3n}\t {:.5f}\t {:.5f}\t\t {:.5f}\t {:.3f}\t {}'.format(self.number, en.get('E', float(0)), en.get('G', float(0)), en.get('B', float(0)), en.get('Erel', float(0)), en.get('time'))
-        return txt 
+        number, e, g, b, erel, time, pop = self.number, en.get('E', float(0)), en.get('G', float(0)), en.get('B', float(0)), en.get('Erel', float(0)), en.get('time'), en.get('Pop', float(0))
+        if g: g /= 627.51
+        return number, e/627.51, g, b, erel, pop, time
 
 
 
