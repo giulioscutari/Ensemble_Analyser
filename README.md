@@ -47,4 +47,4 @@ Contributions to this software are always welcome! If you have any ideas or sugg
 
 ## License
 
-This software is licensed under the MIT License. See the LICENSE file for details.
+This software is licensed under the GPL-3.0 License. See the LICENSE file for details.
