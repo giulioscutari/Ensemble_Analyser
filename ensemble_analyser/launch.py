@@ -13,7 +13,7 @@ def launch(conf, protocol, cpu, log):
     try:
         st = time.perf_counter()
 
-        calculator = protocol.get_calculator(cpu=cpu, charge=conf.charge, mult=conf.mult)
+        calculator, label = protocol.get_calculator(cpu=cpu, charge=conf.charge, mult=conf.mult)
         atm = conf.get_ase_atoms(calculator)
         atm.get_potential_energy()
 
@@ -24,7 +24,7 @@ def launch(conf, protocol, cpu, log):
 
     except ase.calculators.calculator.CalculationFailed:
         log.error(f'Calulator error.')
-        with open('orca.out') as f:
+        with open(f'{label}.out') as f:
             fl = f.read()
         log.error('\n'.join(fl.splitlines()[-6:-3]))
         raise RuntimeError('Some sort of error have been encountered during the calculation of the calcultor.')
