@@ -127,8 +127,9 @@ class Protocol:
         smd = ''
         if self.solvent and 'xtb' not in self.functional.lower(): smd = self.solvent.orca_input_smd()
 
+        label = 'ORCA'
         calculator = ORCA(
-            label = "ORCA",
+            label = label,
             orcasimpleinput = simple_input,
             orcablocks=f'%pal nprocs {cpu} end ' + smd,
             charge = charge, 
@@ -139,7 +140,7 @@ class Protocol:
 
         # log.debug(f'# Parameters of calculator: {calculator.parameters}\n')
 
-        return calculator
+        return calculator, label
 
 
 
