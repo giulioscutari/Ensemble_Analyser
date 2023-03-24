@@ -1,17 +1,8 @@
 #!/usr/bin/python3
 
-from .conformer import Conformer
+from ensemble_analyser.IOsystem import _parse_xyz_str
+from ensemble_analyser.conformer import Conformer
 import os
-import numpy as np
-
-def _parse_xyz_str(fl):
-    fl = fl[2:]
-    atoms, geom = [] , []
-    for line in fl: 
-        a, *g = line.split()
-        atoms.append(a)
-        geom.append(g)
-    return np.array(atoms),np.array(geom, dtype=float)
 
 def convert_file(file):
     output = '_'.join(file.split('.')[:-1])+'.xyz'
@@ -38,3 +29,5 @@ def read_ensemble(file, charge, multiplicity):
         old_idx = i
 
     return confs
+
+

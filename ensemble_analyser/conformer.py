@@ -2,17 +2,24 @@
 
 import numpy as np
 from ase.atoms import Atoms
-
+from ensemble_analyser.IOsystem import mkdir
 
 class Conformer:
 
     def __init__(self, number: int, geom: np.array, atoms: np.array, charge : int= 0, mult : int = 1) -> None:
         self.number = number
         self._initial_geometry = geom
+        self.charge = charge
+        self.mult = mult
+        
         self.last_geometry = geom
         self.atoms = atoms
         self.energies = {}
         self.active = True
+        
+        # IO
+        self.folder = f'conf_{self.number}'
+        mkdir(self.folder)
     
     def get_ase_atoms(self, calc=None):
         return Atoms(
@@ -20,7 +27,7 @@ class Conformer:
             positions = self.last_geometry,
             calculator=calc
         )
-    
+
     @property
     def rotatory(self):
         return self.energies[list(self.energies.keys())[-1]]['B']

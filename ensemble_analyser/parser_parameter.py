@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import cclib, re
+import cclib, re, os
 import numpy as np
 
 def parse_rotational_const(x):
@@ -13,10 +13,10 @@ def parse_dipole_moment(x):
 
 def get_conf_parameters(conf, number, time):
 
-    data = cclib.io.ccread('ORCA.out')
+    data = cclib.io.ccread(os.path.join(conf.folder, f'protocol_{number}.out'))
     e, g = data.__dict__.get('scfenergies', None)[-1], data.__dict__.get('freeenergy', None)
 
-    with open('ORCA.out') as f:
+    with open(os.path.join(conf.folder, f'protocol_{number}.out')) as f:
         fl = f.readlines()
 
     B = np.linalg.norm(np.array(list(filter(parse_rotational_const, fl))[-1].strip().split(':')[-1].split(), dtype=float))

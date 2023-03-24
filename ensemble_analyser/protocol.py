@@ -84,9 +84,9 @@ class Protocol:
         if self.freq: c += 2
         return c
 
-    def get_calculator(self, cpu, opt=False):
+    def get_calculator(self, cpu, charge:int, mult:int):
         calc = {
-            'orca' : self.get_orca_calculator(cpu, opt)
+            'orca' : self.get_orca_calculator(cpu, charge, mult)
         }
 
         return calc[self.calculator]
@@ -105,11 +105,7 @@ class Protocol:
         return f'{self.functional}/{self.basis}' + (str(self.solvent) if self.solvent.solvent else '')
     
 
-    def get_orca_calculator(self, cpu:int, opt:bool = False, charge:int = 0, mult:int = 1):
-        
-        # if FREQ and OPT, every calculation from ASE is also an HESSIAN calculation, so switching off FREQ when also optimizing
-        freq = self.freq if not opt else False
-
+    def get_orca_calculator(self, cpu:int, charge:int, mult:int):
         # possibilities for solvent definitions
         if self.solvent.solvent:
             if 'xtb' in self.functional.lower():
@@ -121,7 +117,7 @@ class Protocol:
 
         # ! B3LYP def2-SVP FREQ CPCM(solvent) ENGRAD
         # the optimisation is carried by ASE, ORCA is a gradient engine
-        simple_input = f'{self.functional} {self.basis} {"freq" if freq else ""}{"opt" if opt else ""}{solv}'
+        simple_input = f'{self.functional} {self.basis} {"freq" if self.freq else ""}{"opt" if self.opt else ""}{solv}'
 
 
         # %cpcm
@@ -132,10 +128,12 @@ class Protocol:
         if self.solvent and 'xtb' not in self.functional.lower(): smd = self.solvent.orca_input_smd()
 
         calculator = ORCA(
-        label = "ORCA",
-        orcasimpleinput = simple_input,
-        orcablocks=f'%pal nprocs {cpu} end ' + smd,
-        charge = charge, mult=mult, task='energy'
+            label = "ORCA",
+            orcasimpleinput = simple_input,
+            orcablocks=f'%pal nprocs {cpu} end ' + smd,
+            charge = charge, 
+            mult = mult, 
+            task='energy'
         )
 
 

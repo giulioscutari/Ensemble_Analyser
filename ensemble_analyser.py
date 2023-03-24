@@ -53,9 +53,15 @@ def main(ensemble: str, protocol_file: str , threshold_file: str , cpu:int, outp
         confs = sorted(confs)
 
         calculate_rel_energies(confs, temperature)
-
+        log.info('')
+        log.info('Ended Calculations')
+        log.info('')
+        log.info('Summary')
+        log.info('')
         log.info(tabulate([i.create_log() for i in confs if i.active], headers=['CONFS', 'E[Eh]' ,'G[Eh]', 'B[cm-1]', 'E. Rel [kcal/mol]', 'Pop [%]', 'Elap. time [sec]'], floatfmt=".6f"))
+        log.info('')
 
+        log.info('Start Pruning')
         confs = check_ensemble(confs, p, log)
         save_snapshot(f'ensemble_after_{p.number}.xyz', confs, log)
 

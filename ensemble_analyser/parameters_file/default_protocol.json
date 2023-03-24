@@ -1,22 +1,32 @@
 {
     "0": {
-        "func": "pbe",
+        "func": "PBE",
         "basis": "def2-SVP",
         "opt": false,
         "freq": false,
         "solv" : {
-            "solvent": null,
+            "solvent": "toluene",
             "smd" : false
         }
     },
     "1": {
-        "func": "pbe",
+        "func": "PBE",
         "basis": "def2-SVP",
         "opt": true,
         "freq": false,
         "solv" : {
-            "solvent": null,
+            "solvent": "toluene",
             "smd" : false
         }
+    },
+    "2": {
+    	"func": "PBE",
+	"basis": "def2-svp",
+	"opt": true,
+	"freq": true,
+	"solv" : {
+		"solvent": "toluene", 
+		"smd": false
+	}
     }
 }
