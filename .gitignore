@@ -129,7 +129,9 @@ dmypy.json
 .pyre/
 
 # User Define files
-tests/
+.vscode/
+test/
+files/
 *xyz
 ORCA*
 output.out
