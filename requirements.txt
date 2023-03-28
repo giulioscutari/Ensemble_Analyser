@@ -1,0 +1,6 @@
+numpy
+shutil
+scipy
+tabulate
+git+https://github.com/cclib/cclib.git@main
+git+https://gitlab.com/ase/ase.git@master
