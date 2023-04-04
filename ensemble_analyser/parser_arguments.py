@@ -19,7 +19,10 @@ def print_help_protocol():
                     "smd": "bool: TRUE IF SMD MODEL EMPLOYED FOR IMPLICIT CALCULATION, ELSE CPCM USE",
                     "_comment": "SOLV KEYWORD CAN BE OMITTED, AND A GAS PHASE CALCULATION WILL BE CARRIED OUT."
                     },
-                "add_input": "str: ADDITIONAL INPUT TO BE PASSED TO THE CALCULATOR. NO SANITY CHECK ON THIS BLOCK! USE WITH CARE. DEFAULT null"
+                "add_input": "str: ADDITIONAL INPUT TO BE PASSED TO THE CALCULATOR. NO SANITY CHECK ON THIS BLOCK! USE WITH CARE. DEFAULT null",
+                'thrG' : "float: ADD SPECIAL THRESHOLD FOR THIS PECULIAR STEP OF THE PROTOL FOR thrG, IF NOT PRESENT, THE DEFAULT ONE WILL BE USED", 
+                "thrB" : "float: ADD SPECIAL THRESHOLD FOR THIS PECULIAR STEP OF THE PROTOL FOR thrB, IF NOT PRESENT, THE DEFAULT ONE WILL BE USED", 
+                "thrGMAX" : "float: ADD SPECIAL THRESHOLD FOR THIS PECULIAR STEP OF THE PROTOL FOR thrGMAX, IF NOT PRESENT, THE DEFAULT ONE WILL BE USED"
             }
         }, indent=4
     ) 
@@ -35,7 +38,7 @@ def print_help_threshold():
         contents = json.loads(j.read())
     example = json.dumps(contents, indent=4)
 
-    txt = f'With this JSON file, different pruning parameters can be changed. USE WITH CARE!\n\Here, different types of calculations have different thresholds:\n\t- thrG: Refers to the energy (G or E) threshold to consider two conformers equivalent together with thrB.\n\t- thrB: Refers to the rotary constant threshold to consider two conformers equivalent together with thrG.\n\t- thrGMAX: Refers to the maximum energy window considered. Conformers lying above it will be sorted out immediately.\n\nTwo conformers are considered equivalent if G_(CONFi)-G(CONFi-1) < thrG AND B_(CONFi)-B_(CONFi-1) < thrB.\n\nThe default parametes are:\n{example}\n\nIf you want to change only some of the parameters, ALL parameters must be passed.\nDO NOT CHANGE THE KEYWORDS'
+    txt = f'With this JSON file, different pruning parameters can be changed. USE WITH CARE!\nHere, different types of calculations have different thresholds:\n\t- thrG: Refers to the energy (G or E) threshold to consider two conformers equivalent together with thrB.\n\t- thrB: Refers to the rotary constant threshold to consider two conformers equivalent together with thrG.\n\t- thrGMAX: Refers to the maximum energy window considered. Conformers lying above it will be sorted out immediately.\n\nTwo conformers are considered equivalent if G_(CONFi)-G(CONFi-1) < thrG AND B_(CONFi)-B_(CONFi-1) < thrB.\n\nThe default parametes are:\n{example}\n\nIf you want to change only some of the parameters, ALL parameters must be passed.\nDO NOT CHANGE THE KEYWORDS'
 
     print(txt)
     sys.exit()

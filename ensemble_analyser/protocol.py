@@ -53,7 +53,7 @@ class Solvent:
 
 class Protocol: 
 
-    def __init__(self, number:int, functional:str, basis:str, solvent:Solvent, opt:bool, freq:bool, add_input:str , thrs_json, calculator='orca'):
+    def __init__(self, number:int, functional:str, basis:str, solvent:Solvent, opt:bool, freq:bool, add_input:str , thrs_json, calculator='orca', thrG: float = None, thrB: float = None, thrGMAX: float = None):
 
         self.number = number
         self.functional = functional.upper()
@@ -62,6 +62,9 @@ class Protocol:
         self.opt = opt
         self.freq = freq
         self.add_input = add_input
+        self.thrG = thrG
+        self.thrB = thrB
+        self.thrGMAX = thrGMAX
         self.get_thrs(thrs_json)
         self.calculator = calculator
 
@@ -94,9 +97,9 @@ class Protocol:
 
     def get_thrs(self, thr_json):
         c = LEVEL_DEFINITION[self.number_level]
-        self.thrG = thr_json[c]['thrG']
-        self.thrB = thr_json[c]['thrB']
-        self.thrGMAX = thr_json[c]['thrGMAX']
+        if not self.thrG: self.thrG = thr_json[c]['thrG']
+        if not self.thrB: self.thrB = thr_json[c]['thrB']
+        if not self.thrGMAX: self.thrGMAX = thr_json[c]['thrGMAX']
 
 
     def __str__(self):
@@ -117,7 +120,7 @@ class Protocol:
 
         # ! B3LYP def2-SVP FREQ CPCM(solvent) ENGRAD
         # the optimisation is carried by ASE, ORCA is a gradient engine
-        simple_input = f'{self.functional} {self.basis} {"freq" if self.freq else ""}{"opt" if self.opt else ""}{solv}'
+        simple_input = f'{self.functional} {self.basis} {"freq" if self.freq else ""} {"opt" if self.opt else ""} {solv} nopop'
 
 
         # %cpcm
@@ -131,7 +134,7 @@ class Protocol:
         calculator = ORCA(
             label = label,
             orcasimpleinput = simple_input,
-            orcablocks=f'%pal nprocs {cpu} end ' + smd,
+            orcablocks=f'%pal nprocs {cpu} end ' + smd + self.add_input,
             charge = charge, 
             mult = mult, 
             task='energy'
@@ -154,33 +157,23 @@ def create_protocol(p, thrs, log):
         opt     = d.get('opt', False)
         freq    = d.get('freq', False)
 
-        add_input = d.get('add_input', None)
+        add_input = d.get('add_input', '')
 
         solv    = d.get('solv', None)
         if solv or solv.get('solvent', None): solv = Solvent(solv)
+
+        thrG    = d.get('thrG', None)
+        thrB    = d.get('thrB', None)
+        thrGMAX = d.get('thrGMAX', None)
 
         if not func:
             log.critical(f"{'='*20}\nCRITICAL ERROR\n{'='*20}\nFUNC key must be passed in order to calculate energy. DFT functional or HF for Hartree-Fock calculation or semi-empirical methods (XTB1/XTB2/PM3/AM1 or similar supported by the calculator) (Probelm at {ordinal(int(idx))} protocol definition)\n{'='*20}\n")
             raise IOError('There is an error in the input file with the definition of the functional. See the output file.')
 
-        protocol.append(Protocol(number =idx, functional=func, basis=basis, solvent= solv, opt= opt, freq= freq, add_input= add_input, thrs_json= thrs))
+        protocol.append(Protocol(number =idx, functional=func, basis=basis, solvent= solv, opt= opt, freq= freq, add_input = add_input, thrs_json= thrs, thrG = thrG, thrB = thrB, thrGMAX = thrGMAX))
 
     log.info('\n'.join((f"{i.number}: {str(i)} - {i.calculation_level}\n {i.thr}" for i in protocol)) + '\n')
     return protocol
     #{'charge': 0, 'mult': 1, 'task': 'gradient', 'orcasimpleinput': 'B3LYP def2-svp ', 'orcablocks': ''}
 
-
-if __name__ == '__main__':
-    from logger import log
-
-    thrs_json = load_threshold(None)
-
-    p = Protocol(1, 'B3LYP', 'def2-svp', None, True, False, None, thrs_json)
-    log.debug(f'''{p} THRS:
-thrG    : {p.thrG} kcal/mol
-thrB    : {p.thrB} cm-1
-thrGMAX : {p.thrGMAX} kcal/mol
-    ''')
-
-    p.get_orca_calculator(1)
 

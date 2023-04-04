@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from ase.build import minimize_rotation_and_translation
+from scipy.constants import R
 from tabulate import tabulate
 import numpy as np
 
@@ -97,6 +98,17 @@ def check_ensemble(confs, protocol, log) -> list:
     log.info('')
 
     return confs
+
+def calculate_rel_energies(conformers, T):
+    c = [i for i in conformers if i.active]
+    ens = np.array([i.get_energy for i in conformers if i.active])
+    ens -= min(ens)
+    bolz = np.exp((-ens*4186)/(R*T))
+    pop = (bolz/np.sum(bolz))*100
+    for idx, i in enumerate(list(ens)):
+        c[idx]._last_energy['Erel'] = i
+        c[idx]._last_energy['Pop'] = pop[idx]
+
 
 
 
