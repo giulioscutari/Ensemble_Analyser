@@ -35,7 +35,7 @@ def rmsd(check, ref):
 
 
 
-def check(check, conf_ref, protocol, controller) -> bool:
+def check(check, conf_ref, protocol, controller, log) -> bool:
 
     if not conf_ref.active:
         return False
@@ -51,10 +51,12 @@ def check(check, conf_ref, protocol, controller) -> bool:
         'Deactivate'    : False
     }
 
+    log.debug(controller[l])
+
     if ( controller[l]['∆E [kcal/mol]'] < protocol.thrG  and controller[l]['∆B [e-3 cm-1]']*10**-3 < protocol.thrB):
         check.active = False
         check.diactivated_by = conf_ref.number
-        controller[l] = True
+        controller[l]['Deactivate'] = True
         return True
 
     return False
@@ -62,16 +64,21 @@ def check(check, conf_ref, protocol, controller) -> bool:
 
 
 
-def refactor_dict(controller):
+def refactor_dict(controller, log):
     
     if not controller: return {}
+
+    log.debug(controller)
 
     keys = list(controller[0].keys())
     d = {i : [] for i in keys}
 
+    log.debug(d)
+    log.debug(controller)
     for i in controller:
         for j in d:
             d[j].append(controller[i][j])
+            log.debug(f'{i} {j} {controller[i][j]}')
     return d
 
 
@@ -86,12 +93,11 @@ def check_ensemble(confs, protocol, log) -> list:
     for idx, i in enumerate(confs):
         if not i.active: continue # Not check the non active conformers
         for j in range(0, idx):
-            print('check ', j, idx)
-            if check(i, confs[j], protocol, controller): 
+            log.debug(f'check  {j} - {idx}')
+            if check(i, confs[j], protocol, controller, log): 
                 break
     
-    
-    controller = refactor_dict(controller)
+    controller = refactor_dict(controller, log)
 
     log.info('')
     log.info(tabulate(controller, headers="keys", floatfmt=".3f"))
