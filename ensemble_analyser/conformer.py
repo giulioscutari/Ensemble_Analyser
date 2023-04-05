@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/data/bin/python_env/bin/python3
 
 import numpy as np
 from ase.atoms import Atoms

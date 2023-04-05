@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/data/bin/python_env/bin/python3
 
 from ensemble_analyser.IOsystem import _parse_xyz_str
 from ensemble_analyser.conformer import Conformer
