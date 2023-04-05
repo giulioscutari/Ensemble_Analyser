@@ -1,7 +1,7 @@
 {
     "0": {
         "func": "PBE",
-        "basis": "def2-SVP",
+        "basis": "def2-svp",
         "opt": false,
         "freq": false,
         "solv" : {
@@ -10,9 +10,9 @@
         }
     },
     "1": {
-        "func": "PBE",
-        "basis": "def2-SVP",
-        "opt": true,
+        "func": "r2scan-3c",
+        "basis": "def2-mtzvpp",
+        "opt": false,
         "freq": false,
         "solv" : {
             "solvent": "toluene",
@@ -20,13 +20,13 @@
         }
     },
     "2": {
-    	"func": "PBE",
-	"basis": "def2-svp",
-	"opt": true,
-	"freq": true,
-	"solv" : {
-		"solvent": "toluene", 
-		"smd": false
-	}
+    	"func": "r2scan-3c",
+        "basis": "def2-mtzvpp",
+        "opt": true,
+        "freq": true,
+        "solv" : {
+            "solvent": "toluene", 
+            "smd": false
+        }
     }
 }

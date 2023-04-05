@@ -70,17 +70,17 @@ def parser_arguments():
     molecule_group.add_argument('-m', '--multiplicity', help="Define the multiplicity of the studied system. Default %(default)s", default=1, type=int)
 
     system_group = parser.add_argument_group('System Parameters')
-    system_group.add_argument('cpu', type=int, help='Define the number of CPU used by the calculations')
+    system_group.add_argument('-cpu', type=int, help='Define the number of CPU used by the calculations', required=True)
     system_group.add_argument('-calc', '--calculator', help='Define the calculator to use. Default %(default)s', choices=['orca'], default='orca')
 
     other_group = parser.add_argument_group('Other Parameters')
-    other_group.add_argument('-o', '--output', help='Define the output filename. Defaut: %(default)s', default='output.out')
+    other_group.add_argument('-o', '--output', help='Define the output filename. Default: %(default)s', default='$SLURM_SUBMIT_DIR/output.out')
 
 
     help_group = parser.add_argument_group('Get help')
     help_group.add_argument("-h", "--help", action="help", help="Show this help message")
-    help_group.add_argument('-h-p', '--help-protocol', help='Get help to format correcly the protocol JSON-file', action='store_true')
-    help_group.add_argument('-h-t', '--help-threshold', help='Get help to format correcly the threshold JSON-file', action='store_true')
+    help_group.add_argument('-h-p', '--help-protocol', help='Get help to format correctly the protocol JSON-file', action='store_true')
+    help_group.add_argument('-h-t', '--help-threshold', help='Get help to format correctly the threshold JSON-file', action='store_true')
 
 
     if __name__ == '__main__': 
