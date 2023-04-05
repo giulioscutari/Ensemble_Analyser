@@ -51,7 +51,7 @@ def check(check, conf_ref, protocol, controller, log) -> bool:
         'Deactivate'    : False
     }
 
-    log.debug(controller[l])
+    # log.debug(controller[l])
 
     if ( controller[l]['∆E [kcal/mol]'] < protocol.thrG  and controller[l]['∆B [e-3 cm-1]']*10**-3 < protocol.thrB):
         check.active = False
@@ -68,17 +68,17 @@ def refactor_dict(controller, log):
     
     if not controller: return {}
 
-    log.debug(controller)
+    # log.debug(controller)
 
     keys = list(controller[0].keys())
     d = {i : [] for i in keys}
 
-    log.debug(d)
-    log.debug(controller)
+    # log.debug(d)
+    # log.debug(controller)
     for i in controller:
         for j in d:
             d[j].append(controller[i][j])
-            log.debug(f'{i} {j} {controller[i][j]}')
+            # log.debug(f'{i} {j} {controller[i][j]}')
     return d
 
 
@@ -93,7 +93,7 @@ def check_ensemble(confs, protocol, log) -> list:
     for idx, i in enumerate(confs):
         if not i.active: continue # Not check the non active conformers
         for j in range(0, idx):
-            log.debug(f'check  {j} - {idx}')
+            # log.debug(f'check  {j} - {idx}')
             if check(i, confs[j], protocol, controller, log): 
                 break
     
