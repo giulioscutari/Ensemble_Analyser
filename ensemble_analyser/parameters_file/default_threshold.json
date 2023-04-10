@@ -17,6 +17,6 @@
     "sp" : {
         "thrG" : 0.25, 
         "thrB" : 1e-5,
-        "thrGMAX" : 10
+        "thrGMAX" : 6
     }
 }

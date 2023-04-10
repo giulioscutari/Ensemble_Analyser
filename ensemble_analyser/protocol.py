@@ -134,14 +134,11 @@ class Protocol:
         calculator = ORCA(
             label = label,
             orcasimpleinput = simple_input,
-            orcablocks=f'%pal nprocs {cpu} end ' + smd + self.add_input,
+            orcablocks=f'%pal nprocs {cpu} end ' + smd + self.add_input + ('%maxcore 4000' if 'maxcore' not in self.add_input else ''),
             charge = charge, 
             mult = mult, 
             task='energy'
         )
-
-
-        # log.debug(f'# Parameters of calculator: {calculator.parameters}\n')
 
         return calculator, label
 

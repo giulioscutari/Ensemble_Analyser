@@ -9,7 +9,7 @@ def convert_file(file):
     os.system(f'obabel {file} -O{output}')
     return output
 
-def read_ensemble(file, charge, multiplicity):
+def read_ensemble(file, charge, multiplicity, log):
 
     confs = []
 

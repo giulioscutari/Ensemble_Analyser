@@ -26,7 +26,9 @@ def main(ensemble: str, protocol_file: str , threshold_file: str , cpu:int, outp
 
 
     log.debug('# Reading ensemble file')
-    conformers = read_ensemble(ensemble, charge, multiplicity)
+    conformers = read_ensemble(ensemble, charge, multiplicity, log)
+
+    return 
 
     for p in protocol:
 
