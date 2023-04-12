@@ -33,6 +33,17 @@ def rmsd(check, ref):
     return np.sqrt(1/len(ref.get_positions())) * np.linalg.norm(np.array(ref_pos.get_positions())-np.array(check_pos.get_positions()))
 
 
+def dict_compare(check, conf_ref, deactivate=True):
+    return {
+        'Check'         : check.number,
+        'Ref'           : conf_ref.number,
+        '∆E [kcal/mol]' : check.get_energy - conf_ref.get_energy,
+        '∆B [e-3 cm-1]' : np.abs(check.rotatory - conf_ref.rotatory)*10**3,
+        '∆m [Debye]'    : np.abs(check.moment - conf_ref.moment),
+        'RMSD [Å]'      : rmsd(check.get_ase_atoms(), conf_ref.get_ase_atoms()),
+        'Deactivate'    : deactivate
+    }
+
 
 
 def check(check, conf_ref, protocol, controller, log) -> bool:
@@ -41,23 +52,16 @@ def check(check, conf_ref, protocol, controller, log) -> bool:
         return False
 
     l = len(controller)
-    controller[l] = {
-        'Check'         : check.number,
-        'Ref'           : conf_ref.number,
-        '∆E [kcal/mol]' : check.get_energy - conf_ref.get_energy,
-        '∆B [e-3 cm-1]' : np.abs(check.rotatory - conf_ref.rotatory)*10**3,
-        '∆m [Debye]'    : np.abs(check.moment - conf_ref.moment),
-        'RMSD [Å]'      : rmsd(check.get_ase_atoms(), conf_ref.get_ase_atoms()),
-        'Deactivate'    : False
-    }
 
-    # log.debug(controller[l])
+    controller[l] = dict_compare(check, conf_ref, deactivate=False)
 
     if ( controller[l]['∆E [kcal/mol]'] < protocol.thrG  and controller[l]['∆B [e-3 cm-1]']*10**-3 < protocol.thrB):
         check.active = False
         check.diactivated_by = conf_ref.number
-        controller[l]['Deactivate'] = True
+        controller[l] = dict_compare(check, conf_ref)
         return True
+
+    controller.pop(l)
 
     return False
 
@@ -68,17 +72,12 @@ def refactor_dict(controller, log):
     
     if not controller: return {}
 
-    # log.debug(controller)
-
     keys = list(controller[0].keys())
     d = {i : [] for i in keys}
 
-    # log.debug(d)
-    # log.debug(controller)
     for i in controller:
         for j in d:
             d[j].append(controller[i][j])
-            # log.debug(f'{i} {j} {controller[i][j]}')
     return d
 
 
@@ -93,7 +92,6 @@ def check_ensemble(confs, protocol, log) -> list:
     for idx, i in enumerate(confs):
         if not i.active: continue # Not check the non active conformers
         for j in range(0, idx):
-            # log.debug(f'check  {j} - {idx}')
             if check(i, confs[j], protocol, controller, log): 
                 break
     

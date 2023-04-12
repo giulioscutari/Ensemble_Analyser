@@ -1,5 +1,5 @@
 import numpy as np
-import shutil
+import shutil, json
 import os
 
 
@@ -21,3 +21,10 @@ def mkdir(directory:str):
     os.mkdir(directory)
     return None
 
+
+
+class SerialiseEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return obj.__dict__

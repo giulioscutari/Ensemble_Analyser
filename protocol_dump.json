@@ -1,0 +1,50 @@
+{
+    "0": {
+        "number": "0",
+        "functional": "PBE",
+        "basis": "DEF2-SVP",
+        "solvent": {
+            "solvent": "toluene",
+            "smd": false
+        },
+        "opt": false,
+        "freq": false,
+        "add_input": "",
+        "thrG": 0.25,
+        "thrB": 1e-05,
+        "thrGMAX": 6,
+        "calculator": "orca"
+    },
+    "1": {
+        "number": "1",
+        "functional": "R2SCAN-3C",
+        "basis": "DEF2-MTZVPP",
+        "solvent": {
+            "solvent": "toluene",
+            "smd": false
+        },
+        "opt": false,
+        "freq": false,
+        "add_input": "",
+        "thrG": 0.25,
+        "thrB": 1e-05,
+        "thrGMAX": 6,
+        "calculator": "orca"
+    },
+    "2": {
+        "number": "2",
+        "functional": "R2SCAN-3C",
+        "basis": "DEF2-MTZVPP",
+        "solvent": {
+            "solvent": "toluene",
+            "smd": false
+        },
+        "opt": true,
+        "freq": true,
+        "add_input": "",
+        "thrG": 0.5,
+        "thrB": 5e-05,
+        "thrGMAX": 3.5,
+        "calculator": "orca"
+    }
+}

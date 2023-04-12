@@ -6,7 +6,7 @@ from ensemble_analyser.IOsystem import mkdir
 
 class Conformer:
 
-    def __init__(self, number: int, geom: np.array, atoms: np.array, charge : int= 0, mult : int = 1) -> None:
+    def __init__(self, number: int, geom: np.array, atoms: np.array, charge : int= 0, mult : int = 1, raw=False) -> None:
         self.number = number
         self._initial_geometry = geom
         self.charge = charge
@@ -19,7 +19,7 @@ class Conformer:
         
         # IO
         self.folder = f'conf_{self.number}'
-        mkdir(self.folder)
+        if not raw: mkdir(self.folder)
     
     def get_ase_atoms(self, calc=None):
         return Atoms(
@@ -61,14 +61,27 @@ class Conformer:
         return number, e/627.51, g, b, erel, pop, time
 
 
+    @staticmethod
+    def load_raw(json):
+        a = Conformer(
+            number = json['number'],
+            geom = json['last_geometry'],
+            atoms = json['atoms'],
+            charge = json['charge'], 
+            mult = json['mult'],
+            raw = True,
+        )
+        a.energies = json['energies']
+        a.active = json['active']
+        return a
+
 
     def __str__(self) -> str:
-        return self.write_xyz()
+        return str(self.number)
     
     def __repr__(self) -> str:
-        return self.write_xyz()
+        return str(self.number)
     
-
 
     # Functions needed for sorting the conformers' ensemble
 

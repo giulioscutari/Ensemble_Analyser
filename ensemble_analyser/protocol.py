@@ -1,8 +1,14 @@
 #!/data/bin/python_env/bin/python3
 
+import datetime
 import json, os
 import sys
 from ase.calculators.orca import ORCA
+
+from ensemble_analyser.launch import launch
+from ensemble_analyser.logger import save_snapshot
+from ensemble_analyser.pruning import calculate_rel_energies, check_ensemble
+from tabulate import tabulate
 
 try:
     from .logger import ordinal
@@ -13,11 +19,11 @@ except ModuleNotFoundError:
 DEBUG = os.getenv('DEBUG')
 
 
-def load_protocol(file:str ):
+def load_protocol(file:str):
     default = 'ensemble_analyser/parameters_file/default_protocol.json'
     return json.load(open(default if not file else file ))
 
-def load_threshold(file:str ):
+def load_threshold(file:str):
     default = 'ensemble_analyser/parameters_file/default_threshold.json'
     return json.load(open(default if not file else file ))
 
@@ -30,8 +36,6 @@ LEVEL_DEFINITION = {
     2 : 'FREQ'.lower()        , # single point and frequency analysis
     3 : 'OPT+FREQ'.lower()      # optimisation and frequency analysis
 }
-
-
 
 
 class Solvent: 
@@ -48,7 +52,6 @@ class Solvent:
         if self.smd:
             return f'%cpcm smd true smdsolvent "{self.solvent}" end'
         return ''
-    
 
 
 class Protocol: 
@@ -118,8 +121,7 @@ class Protocol:
         else:
             solv = ''
 
-        # ! B3LYP def2-SVP FREQ CPCM(solvent) ENGRAD
-        # the optimisation is carried by ASE, ORCA is a gradient engine
+        # ! B3LYP def2-SVP FREQ CPCM(solvent)
         simple_input = f'{self.functional} {self.basis} {"freq" if self.freq else ""} {"opt" if self.opt else ""} {solv} nopop'
 
 
@@ -141,6 +143,23 @@ class Protocol:
         )
 
         return calculator, label
+    
+    @staticmethod
+    def load_raw(json):
+        return Protocol(
+            number = json['number'],
+            functional = json['functional'],
+            basis = json['basis'],
+            solvent = Solvent(json['solvent']),
+            opt = json['opt'],
+            freq = json['freq'], 
+            add_input = json['add_input'],
+            calculator=json['calculator'],
+            thrs_json = None, 
+            thrB=json['thrB'], 
+            thrG=json['thrG'], 
+            thrGMAX=json['thrGMAX']
+        )
 
 
 
@@ -171,6 +190,35 @@ def create_protocol(p, thrs, log):
 
     log.info('\n'.join((f"{i.number}: {str(i)} - {i.calculation_level}\n {i.thr}" for i in protocol)) + '\n')
     return protocol
+
+
+def run_protocol(conformers, p, temperature, cpu, log):
+    log.info(f'STARTING PROTOCOL {p.number}')
+    log.info(f'\nActive conformers for this phase: {len([i for i in conformers if i.active])}\n')
+    for i in conformers:
+        if not i.active: continue
+        if i.energies.get(str(p.number)): continue
+        launch(i, p, cpu, log, conformers)
+
+    conformers_tmp = sorted(conformers)
+
+    calculate_rel_energies(conformers, temperature)
+
+    log.info('')
+    log.info('Ended Calculations')
+    log.info('')
+    log.info('Summary')
+    log.info('')
+    log.info(tabulate([i.create_log() for i in conformers_tmp if i.active], headers=['conformers', 'E[Eh]' ,'G[Eh]', 'B[cm-1]', 'E. Rel [kcal/mol]', 'Pop [%]', 'Elap. time [sec]'], floatfmt=".6f"))
+    log.info('')
+    log.info('Total elapsed time: ' + str(datetime.timedelta(seconds = sum([i._last_energy['time'] for i in conformers_tmp if i.active]))))
+
+    log.info('Start Pruning')
+    conformers = check_ensemble(conformers, p, log)
+    save_snapshot(f'ensemble_after_{p.number}.xyz', conformers, log)
+
+    log.info(f'{"="*15}\nEND PROTOCOL {p.number}\n{"="*15}\n\n')
     #{'charge': 0, 'mult': 1, 'task': 'gradient', 'orcasimpleinput': 'B3LYP def2-svp ', 'orcablocks': ''}
+
 
 
