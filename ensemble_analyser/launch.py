@@ -181,9 +181,6 @@ def main():
     )
 
 
-    os.system('rm ORCA*')
-
-
 
 
 
