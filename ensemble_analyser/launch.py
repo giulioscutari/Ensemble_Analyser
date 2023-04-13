@@ -10,9 +10,12 @@ from ensemble_analyser.IOsystem import SerialiseEncoder
 
 import ase
 import time, json
+import datetime
+from tabulate import tabulate
 import sys, os
 
-from ensemble_analyser.protocol import Protocol, create_protocol, load_protocol, load_threshold, run_protocol
+from ensemble_analyser.protocol import Protocol, Solvent, load_protocol, load_threshold
+from ensemble_analyser.pruning import calculate_rel_energies, check_ensemble
 
 
 def launch(conf, protocol, cpu, log, ensemble):
@@ -42,9 +45,39 @@ def launch(conf, protocol, cpu, log, ensemble):
         raise RuntimeError('Some sort of error have been encountered during the calculation of the calcultor.')
 
 
-    get_conf_parameters(conf, protocol.number, end-st)
+    get_conf_parameters(conf, protocol.number, end-st, log)
 
     json.dump({i.number: i.__dict__ for i in ensemble}, open('checkpoint.json', 'w'), indent=4, cls=SerialiseEncoder)
+
+
+
+def run_protocol(conformers, p, temperature, cpu, log):
+    log.info(f'STARTING PROTOCOL {p.number}')
+    log.info(f'\nActive conformers for this phase: {len([i for i in conformers if i.active])}\n')
+    for i in conformers:
+        if not i.active: continue
+        if i.energies.get(str(p.number)): continue
+        launch(i, p, cpu, log, conformers)
+
+    conformers_tmp = sorted(conformers)
+
+    calculate_rel_energies(conformers, temperature)
+
+    log.info('')
+    log.info('Ended Calculations')
+    log.info('')
+    log.info('Summary')
+    log.info('')
+    log.info(tabulate([i.create_log() for i in conformers_tmp if i.active], headers=['conformers', 'E[Eh]' ,'G[Eh]', 'B[cm-1]', 'E. Rel [kcal/mol]', 'Pop [%]', 'Elap. time [sec]'], floatfmt=".6f"))
+    log.info('')
+    log.info('Total elapsed time: ' + str(datetime.timedelta(seconds = sum([i._last_energy['time'] for i in conformers_tmp if i.active]))))
+
+    log.info('Start Pruning')
+    conformers = check_ensemble(conformers, p, log)
+    save_snapshot(f'ensemble_after_{p.number}.xyz', conformers, log)
+
+    log.info(f'{"="*15}\nEND PROTOCOL {p.number}\n{"="*15}\n\n')
+
 
 def start_calculation(conformers, protocol, cpu:int, temperature: float, start_from: int, log):
 
@@ -64,6 +97,8 @@ def start_calculation(conformers, protocol, cpu:int, temperature: float, start_f
 
     return None
 
+
+
 def restart():
 
     confs = json.load(open('checkpoint.json'))
@@ -76,6 +111,36 @@ def restart():
         start_from = int(f.readlines()[0])
 
     return ensemble, protocol, start_from
+
+
+
+def create_protocol(p, thrs, log):
+    protocol = []
+
+    log.info('Loading Protocol\n')
+    for idx, d in p.items():
+        func    = d.get('func', None)
+        basis   = d.get('basis', 'def2-svp')
+        opt     = d.get('opt', False)
+        freq    = d.get('freq', False)
+
+        add_input = d.get('add_input', '')
+
+        solv    = d.get('solv', None)
+        if solv or solv.get('solvent', None): solv = Solvent(solv)
+
+        thrG    = d.get('thrG', None)
+        thrB    = d.get('thrB', None)
+        thrGMAX = d.get('thrGMAX', None)
+
+        if not func:
+            log.critical(f"{'='*20}\nCRITICAL ERROR\n{'='*20}\nFUNC key must be passed in order to calculate energy. DFT functional or HF for Hartree-Fock calculation or semi-empirical methods (XTB1/XTB2/PM3/AM1 or similar supported by the calculator) (Probelm at {ordinal(int(idx))} protocol definition)\n{'='*20}\n")
+            raise IOError('There is an error in the input file with the definition of the functional. See the output file.')
+
+        protocol.append(Protocol(number =idx, functional=func, basis=basis, solvent= solv, opt= opt, freq= freq, add_input = add_input, thrs_json= thrs, thrG = thrG, thrB = thrB, thrGMAX = thrGMAX))
+
+    log.info('\n'.join((f"{i.number}: {str(i)} - {i.calculation_level}\n {i.thr}" for i in protocol)) + '\n')
+    return protocol
 
 def main():
     args = parser_arguments()
@@ -117,6 +182,8 @@ def main():
 
 
     os.system('rm ORCA*')
+
+
 
 
 

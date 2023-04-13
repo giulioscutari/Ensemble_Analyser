@@ -5,6 +5,10 @@ from ase.atoms import Atoms
 from ensemble_analyser.IOsystem import mkdir
 
 class Conformer:
+    '''
+    Storing all the information on each conformer for all the parts of the protocol
+    
+    '''
 
     def __init__(self, number: int, geom: np.array, atoms: np.array, charge : int= 0, mult : int = 1, raw=False) -> None:
         self.number = number

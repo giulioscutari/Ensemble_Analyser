@@ -11,13 +11,17 @@ def parse_dipole_moment(x):
     if re.search('Total Dipole Moment', x):
         return x
 
-def get_conf_parameters(conf, number, time):
+def get_conf_parameters(conf, number, time, log):
 
     data = cclib.io.ccread(os.path.join(conf.folder, f'protocol_{number}.out'))
     e, g = data.__dict__.get('scfenergies', None)[-1], data.__dict__.get('freeenergy', None)
-
+    
     with open(os.path.join(conf.folder, f'protocol_{number}.out')) as f:
-        fl = f.readlines()
+        fl = f.readlines() 
+
+    if ('freq' in data.metadata['input_file_contents'] and not g):
+        log.error(('\n'.join(fl[-6:])).strip())
+        raise RuntimeError('Some sort of error have been encountered during the calculation of the calcultor.')
 
     B = np.linalg.norm(np.array(list(filter(parse_rotational_const, fl))[-1].strip().split(':')[-1].split(), dtype=float))
 
