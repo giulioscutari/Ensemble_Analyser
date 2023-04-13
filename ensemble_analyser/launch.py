@@ -59,7 +59,7 @@ def run_protocol(conformers, p, temperature, cpu, log):
         if i.energies.get(str(p.number)): continue
         launch(i, p, cpu, log, conformers)
 
-    conformers_tmp = sorted(conformers)
+    conformers = sorted(conformers)
 
     calculate_rel_energies(conformers, temperature)
 
@@ -68,9 +68,9 @@ def run_protocol(conformers, p, temperature, cpu, log):
     log.info('')
     log.info('Summary')
     log.info('')
-    log.info(tabulate([i.create_log() for i in conformers_tmp if i.active], headers=['conformers', 'E[Eh]' ,'G[Eh]', 'B[cm-1]', 'E. Rel [kcal/mol]', 'Pop [%]', 'Elap. time [sec]'], floatfmt=".6f"))
+    log.info(tabulate([i.create_log() for i in conformers if i.active], headers=['conformers', 'E[Eh]' ,'G[Eh]', 'B[cm-1]', 'E. Rel [kcal/mol]', 'Pop [%]', 'Elap. time [sec]'], floatfmt=".6f"))
     log.info('')
-    log.info('Total elapsed time: ' + str(datetime.timedelta(seconds = sum([i._last_energy['time'] for i in conformers_tmp if i.active]))))
+    log.info('Total elapsed time: ' + str(datetime.timedelta(seconds = sum([i._last_energy['time'] for i in conformers if i.active]))))
 
     log.info('Start Pruning')
     conformers = check_ensemble(conformers, p, log)
