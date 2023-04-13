@@ -134,5 +134,7 @@ test/
 files/
 *xyz
 ORCA*
-output.out
+output*.out
 conf_*/
+*json
+last_protocol
