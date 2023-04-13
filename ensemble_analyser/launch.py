@@ -153,7 +153,7 @@ def main():
             'cpu' : args.cpu,
             'temperature' : args.temperature,
         }
-        json.dumps(settings, open('settings.json', 'w'), indent=4)
+        json.dump(settings, open('settings.json', 'w'), indent=4)
 
     output = settings.get('output', args.output) if not args.restart else ''.join(settings.get('output', args.output).split('.')[:-1])+'_restart.out'
     cpu = settings.get('cpu', args.cpu)
