@@ -15,14 +15,14 @@ from .logger import save_snapshot, DEBUG
 def cut_over_thr_max(confs: list, thrGMAX: float, log) -> list:
 
 
-    ens = np.array([i.get_energy for i in confs if i.active])
-    ens = ens-min(ens)
+    ens = np.array([(i, i.get_energy) for i in confs if i.active])
+    ens[:,1] = ens[:,1]-min(ens[:,1])
 
-    remov_confs = np.array([i for i in confs if i.active])[ens > thrGMAX]
-    log.info(f'\nGetting number of conformers lying out of the energy windows (over {thrGMAX} kcal/mol) - {len(remov_confs)}')
-    for i in list(remov_confs):
-        i.active = False
-        log.info(f'{i.number} - {ens[confs.index(i)]}')
+    log.info(f'\nGetting number of conformers lying out of the energy windows (over {thrGMAX} kcal/mol)')
+    for i, en in list(ens):
+        if en > thrGMAX:
+            i.active = False
+            log.info(f'{i.number} - {en:.3f}')
     log.info('\n')
 
 

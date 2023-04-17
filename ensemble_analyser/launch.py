@@ -79,12 +79,33 @@ def run_protocol(conformers, p, temperature, cpu, log):
     log.info(f'{"="*15}\nEND PROTOCOL {p.number}\n{"="*15}\n\n')
 
 
+
+def last_protocol_completed(conf, idx:int):
+
+    tmp = []
+    for i in conf: 
+        if i.energies.get(int(idx)) is not None and i.active:
+            tmp.append(i)
+
+    print(tmp)
+
+    return len([
+        # i for i in conf if i.energies.get(int(idx)) is not None and i.active
+        tmp
+    ]) == 0
+
+
+
 def start_calculation(conformers, protocol, cpu:int, temperature: float, start_from: int, log):
 
     log.debug('# Reading protocol and threshold files')
 
 
     log.debug('# Reading ensemble file')
+
+    if start_from != 0:
+        if last_protocol_completed(conformers, start_from):
+            conformers = check_ensemble(conformers, protocol[start_from], log)
 
     for p in protocol[start_from:]:
         with open('last_protocol', 'w') as f:
@@ -164,6 +185,7 @@ def main():
 
     if args.restart:
         conformers, protocol, start_from = restart()
+
     else:
         protocol = create_protocol(load_protocol(args.protocol), load_threshold(args.threshold), log)
         start_from = protocol[0].number
