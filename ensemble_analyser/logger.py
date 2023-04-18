@@ -14,7 +14,7 @@ def save_snapshot(output, confs, log):
     log.debug('Saving snapshot of the ensemble')
     with open(output, 'w') as f:
         for i in confs:
-            f.write(f'{i}\n')
+            f.write(f'{i.write_xyz()}\n')
 
     return None
 
