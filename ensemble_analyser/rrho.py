@@ -1,3 +1,6 @@
+#!/data/bin/python_env/bin/python3
+
+
 import numpy as np
 from scipy.constants import R, h, c, Boltzmann, N_A
 from scipy.constants import physical_constants
