@@ -144,7 +144,7 @@ def calc_S_V_grimme(freq:np.array, T) -> np.array:
     Return in J
     """
     f = h*freq*c/(Boltzmann*T) 
-    return (f*Boltzmann)/(np.exp(f)-1) - Boltzmann*np.log(1-np.exp(-f))
+    return (f*Boltzmann)/(np.exp(f)-1) - Boltzmann * np.log(1-np.exp(-f))
 
 
 def calc_S_R_grimme(freq:np.array, T: float, B:np.array) -> np.array:
@@ -185,7 +185,7 @@ def calc_electronic_entropy(m) -> float:
 
     Return in Eh
     """
-    return Boltzmann * (np.log(m)) * J_TO_H
+    return Boltzmann * np.log(m) * J_TO_H
 
 
 
@@ -209,6 +209,8 @@ def free_gibbs_energy(
     alpha | int : frequency damping factor
     P | float : pressure [kPa]
     """
+    freq = freq[freq> 0]
+
     zpve = calc_zpe(freq)
 
     U_trans = calc_translational_energy(T)
@@ -216,32 +218,12 @@ def free_gibbs_energy(
     U_vib = calc_vibrational_energy(freq, T, cut_off, alpha)
 
     H = SCF + zpve + U_trans + U_rot + U_vib + Boltzmann*T*J_TO_H
-    U = SCF + zpve + U_trans + U_rot + U_vib
-
-    print(f'{SCF = }')
-    print(f'{zpve = }')
-    print(f'{U_vib = }')
-    print(f'{U_rot = }')
-    print(f'{U_trans = }')
-
-    print(f'Thermal correction = {U_trans + U_rot + U_vib}')
-
-
-    print(f'{U = }')
-    print(f'{H = }')
-
+    # U = SCF + zpve + U_trans + U_rot + U_vib
 
     S_elec = calc_electronic_entropy(m)
     S_vib = calc_vibrational_entropy(freq, T, B, cut_off, alpha)
     S_rot = calc_rotational_entropy(B, T, zpve)
     S_trans = calc_translational_entropy(mw, T, P)
-
-
-    print(f'{S_elec * T = }')
-    print(f'{S_vib  * T = }')
-    print(f'{S_rot * T = }')
-    print(f'{S_trans * T = }')
-    print(f'Entropy correction = {T*(S_trans + S_rot + S_vib + S_elec)}')
 
     S = S_trans + S_rot + S_vib + S_elec
 
@@ -258,6 +240,7 @@ if __name__ == '__main__':
 
     print(f'CCLIB H = {data.enthalpy}', )
     print(f'CCLIB G = {data.freeenergy}', end='\n'+'='*8+'\n')
+
     G = free_gibbs_energy(-2603.37063340, 298.15, freq, mw=sum(data.atommasses), B=np.array([0.001711, 0.001198, 0.001107]), m=1)
 
     print(f'{"="*8}\n{G = }\n{(G - data.freeenergy)*627.51 = }')

@@ -18,7 +18,7 @@ from ensemble_analyser.protocol import Protocol, Solvent, load_protocol, load_th
 from ensemble_analyser.pruning import calculate_rel_energies, check_ensemble
 
 
-def launch(conf, protocol, cpu, log, ensemble):
+def launch(conf, protocol, cpu, log, temp, ensemble):
 
     log.info(f'Running {ordinal(int(protocol.number))} PROTOCOL -> CONF{conf.number}')
     try:
@@ -45,7 +45,7 @@ def launch(conf, protocol, cpu, log, ensemble):
         raise RuntimeError('Some sort of error have been encountered during the calculation of the calcultor.')
 
 
-    get_conf_parameters(conf, protocol.number, end-st, log)
+    get_conf_parameters(conf, protocol.number, end-st, temp, log)
 
     json.dump({i.number: i.__dict__ for i in ensemble}, open('checkpoint.json', 'w'), indent=4, cls=SerialiseEncoder)
 
@@ -57,7 +57,7 @@ def run_protocol(conformers, p, temperature, cpu, log):
     for i in conformers:
         if not i.active: continue
         if i.energies.get(str(p.number)): continue
-        launch(i, p, cpu, log, conformers)
+        launch(i, p, cpu, log, temperature, conformers)
 
     conformers = sorted(conformers)
 
@@ -148,7 +148,7 @@ def create_protocol(p, thrs, log):
         add_input = d.get('add_input', '')
 
         solv    = d.get('solv', None)
-        if solv or solv.get('solvent', None): solv = Solvent(solv)
+        if solv or d.get('solvent', None): solv = Solvent(solv)
 
         thrG    = d.get('thrG', None)
         thrB    = d.get('thrB', None)

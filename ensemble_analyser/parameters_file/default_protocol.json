@@ -1,13 +1,9 @@
 {
     "0": {
-        "func": "PBE",
+        "func": "b97-3c",
         "basis": "def2-svp",
         "opt": false,
-        "freq": false,
-        "solv" : {
-            "solvent": "toluene",
-            "smd" : false
-        }
+        "freq": true
     },
     "1": {
         "func": "r2scan-3c",

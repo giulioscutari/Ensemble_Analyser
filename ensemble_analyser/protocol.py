@@ -95,14 +95,18 @@ class Protocol:
 
 
     def __str__(self):
-        return f'{self.functional}/{self.basis}' + (str(self.solvent) if self.solvent.solvent else '')
-    def __repr__(self):
-        return f'{self.functional}/{self.basis}' + (str(self.solvent) if self.solvent.solvent else '')
+        if self.solvent:
+            return f'{self.functional}/{self.basis} - {self.solvent}'
+        return f'{self.functional}/{self.basis}'
     
+    def __repr__(self):
+        if self.solvent:
+            return f'{self.functional}/{self.basis} - {self.solvent}'
+        return f'{self.functional}/{self.basis}'    
 
     def get_orca_calculator(self, cpu:int, charge:int, mult:int):
         # possibilities for solvent definitions
-        if self.solvent.solvent:
+        if self.solvent:
             if 'xtb' in self.functional.lower():
                 solv = f"ALPB({self.solvent.solvent})"
             else:
