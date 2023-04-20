@@ -234,7 +234,7 @@ def free_gibbs_energy(
 
 
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
     # data = cclib.io.ccread('files/opt.out')
     # freq = data.vibfreqs[data.vibfreqs> 0]
