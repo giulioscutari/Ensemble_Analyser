@@ -2,10 +2,7 @@
 
 import cclib, re, os
 import numpy as np
-try:
-    from ensemble_analyser.rrho import free_gibbs_energy
-except Exception:
-    from rrho import free_gibbs_energy
+from ensemble_analyser.rrho import free_gibbs_energy
 from scipy.constants import physical_constants
 
 
