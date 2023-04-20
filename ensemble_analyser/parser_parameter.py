@@ -3,8 +3,6 @@
 import cclib, re, os
 import numpy as np
 from ensemble_analyser.rrho import free_gibbs_energy
-from scipy.constants import physical_constants
-
 
 EH_TO_KCAL = 627.5096080305927
 

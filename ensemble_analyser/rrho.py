@@ -233,14 +233,8 @@ def free_gibbs_energy(
 
 if __name__ == '__main__':
 
-    data = cclib.io.ccread('files/opt.out')
-    freq = data.vibfreqs[data.vibfreqs> 0]
-    
-    
+    # data = cclib.io.ccread('files/opt.out')
+    # freq = data.vibfreqs[data.vibfreqs> 0]
+    # G = free_gibbs_energy(-2603.37063340, 298.15, freq, mw=sum(data.atommasses), B=np.array([0.001711, 0.001198, 0.001107]), m=1)
 
-    print(f'CCLIB H = {data.enthalpy}', )
-    print(f'CCLIB G = {data.freeenergy}', end='\n'+'='*8+'\n')
 
-    G = free_gibbs_energy(-2603.37063340, 298.15, freq, mw=sum(data.atommasses), B=np.array([0.001711, 0.001198, 0.001107]), m=1)
-
-    print(f'{"="*8}\n{G = }\n{(G - data.freeenergy)*627.51 = }')
