@@ -18,9 +18,9 @@ from ensemble_analyser.protocol import Protocol, Solvent, load_protocol, load_th
 from ensemble_analyser.pruning import calculate_rel_energies, check_ensemble
 
 
-def launch(conf, protocol, cpu, log, temp, ensemble):
+def launch(idx, conf, protocol, cpu, log, temp, ensemble):
 
-    log.info(f'Running {ordinal(int(protocol.number))} PROTOCOL -> CONF{conf.number}')
+    log.info(f'{idx}. Running {ordinal(int(protocol.number))} PROTOCOL -> CONF{conf.number}')
     try:
         st = time.perf_counter()
 
@@ -54,10 +54,12 @@ def launch(conf, protocol, cpu, log, temp, ensemble):
 def run_protocol(conformers, p, temperature, cpu, log):
     log.info(f'STARTING PROTOCOL {p.number}')
     log.info(f'\nActive conformers for this phase: {len([i for i in conformers if i.active])}\n')
+    count = 1
     for i in conformers:
         if not i.active: continue
         if i.energies.get(str(p.number)): continue
-        launch(i, p, cpu, log, temperature, conformers)
+        launch(count, i, p, cpu, log, temperature, conformers)
+        count += 1
 
     conformers = sorted(conformers)
 
