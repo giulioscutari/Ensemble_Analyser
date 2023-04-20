@@ -51,6 +51,7 @@ def get_conf_parameters(conf, number, time, temp, log):
 
     M = np.linalg.norm(np.array(list(filter(parse_dipole_moment, fl))[-1].strip().split(':')[-1].split(), dtype=float))
 
+    g = ''
     if freq.size > 0:
         g = free_gibbs_energy(
             SCF = e, T = temp, freq=freq, 
