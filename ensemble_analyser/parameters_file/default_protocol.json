@@ -3,26 +3,18 @@
         "func": "b97-3c",
         "basis": "def2-svp",
         "opt": false,
-        "freq": true
+        "freq": false
     },
     "1": {
         "func": "r2scan-3c",
         "basis": "def2-mtzvpp",
         "opt": false,
-        "freq": false,
-        "solv" : {
-            "solvent": "toluene",
-            "smd" : false
-        }
+        "freq": false
     },
     "2": {
     	"func": "r2scan-3c",
         "basis": "def2-mtzvpp",
         "opt": true,
-        "freq": true,
-        "solv" : {
-            "solvent": "toluene", 
-            "smd": false
-        }
+        "freq": true
     }
 }
