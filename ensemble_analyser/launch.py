@@ -34,6 +34,8 @@ def launch(idx, conf, protocol, cpu, log, temp, ensemble):
         end = time.perf_counter()
 
         os.rename(f'{label}.out', f'{conf.folder}/protocol_{protocol.number}.out')
+        if protocol.freq: 
+            os.rename(f'{label}.hess', f'{conf.folder}/protocol_{protocol.number}.hess')
         os.remove(f'{label}.gbw')
 
 
