@@ -1,12 +1,9 @@
-#!/data/bin/python_env/bin/python3
-
 
 import numpy as np
 from scipy.constants import R, h, c, Boltzmann, N_A
 from scipy.constants import physical_constants
 
 
-#  import cclib
 c = c*100 # convert speed of light in cm/s
 J_TO_H = physical_constants['joule-hartree relationship'][0]
 AMU_TO_KG = physical_constants['atomic mass constant'][0]
@@ -85,9 +82,8 @@ def calc_vibrational_energy(freq : np.array, T : float, cut_off : float, alpha :
 
     Return the energy in Eh
     """
-    h_damp = calc_damp(freq, cut_off=0, alpha=alpha) 
+    h_damp = calc_damp(freq, cut_off=cut_off, alpha=alpha) 
     return np.sum(h_damp*calc_qRRHO_energy(freq, T) + (1-h_damp) * Boltzmann * T * 0.5) * J_TO_H
-    # return np.sum(calc_qRRHO_energy(freq, T)) * J_TO_H
 
 def calc_translational_entropy(MW: float, T: float, P: float) -> float:
     """
@@ -193,8 +189,6 @@ def calc_electronic_entropy(m) -> float:
 
 
 
-
-
 def free_gibbs_energy(
         SCF : float, T : float, freq : np.array, mw: float, B: np.array, m:int,
         
@@ -221,7 +215,6 @@ def free_gibbs_energy(
     U_vib = calc_vibrational_energy(freq, T, cut_off, alpha)
 
     H = SCF + zpve + U_trans + U_rot + U_vib + Boltzmann*T*J_TO_H
-    # U = SCF + zpve + U_trans + U_rot + U_vib
 
     S_elec = calc_electronic_entropy(m)
     S_vib = calc_vibrational_entropy(freq, T, B, cut_off, alpha)
@@ -232,12 +225,5 @@ def free_gibbs_energy(
 
     return H-T*S
 
-
-
-# if __name__ == '__main__':
-
-    # data = cclib.io.ccread('files/opt.out')
-    # freq = data.vibfreqs[data.vibfreqs> 0]
-    # G = free_gibbs_energy(-2603.37063340, 298.15, freq, mw=sum(data.atommasses), B=np.array([0.001711, 0.001198, 0.001107]), m=1)
 
 

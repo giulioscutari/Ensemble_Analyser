@@ -1,4 +1,4 @@
-#!/data/bin/python_env/bin/python3
+
 
 from ase.build import minimize_rotation_and_translation
 from scipy.constants import R

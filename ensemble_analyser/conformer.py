@@ -1,8 +1,9 @@
-#!/data/bin/python_env/bin/python3
+
+from ensemble_analyser.IOsystem import mkdir
 
 import numpy as np
 from ase.atoms import Atoms
-from ensemble_analyser.IOsystem import mkdir
+
 
 class Conformer:
     '''

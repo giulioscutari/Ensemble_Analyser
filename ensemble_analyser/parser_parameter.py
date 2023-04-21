@@ -1,4 +1,4 @@
-#!/data/bin/python_env/bin/python3
+
 
 # import cclib
 import re, os, sys

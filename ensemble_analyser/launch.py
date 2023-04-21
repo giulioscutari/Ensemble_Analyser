@@ -6,16 +6,16 @@ from ensemble_analyser.logger import create_log, ordinal, save_snapshot
 from ensemble_analyser.parser_arguments import parser_arguments
 from ensemble_analyser.parser_parameter import get_conf_parameters
 from ensemble_analyser.IOsystem import SerialiseEncoder
+from ensemble_analyser.protocol import Protocol, Solvent, load_protocol, load_threshold
+from ensemble_analyser.pruning import calculate_rel_energies, check_ensemble
 
 
 import ase
 import time, json
 import datetime
 from tabulate import tabulate
-import sys, os
+import os
 
-from ensemble_analyser.protocol import Protocol, Solvent, load_protocol, load_threshold
-from ensemble_analyser.pruning import calculate_rel_energies, check_ensemble
 
 
 def launch(idx, conf, protocol, cpu, log, temp, ensemble):
