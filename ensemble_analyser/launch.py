@@ -67,18 +67,16 @@ def run_protocol(conformers, p, temperature, cpu, log):
 
     calculate_rel_energies(conformers, temperature)
 
-    log.info('')
-    log.info('Ended Calculations')
-    log.info('')
-    log.info('Summary')
-    log.info('')
-    log.info(tabulate([i.create_log() for i in conformers if i.active], headers=['Conformers', 'E[Eh]' ,'G[Eh]', 'B[cm-1]', 'E. Rel [kcal/mol]', 'Pop [%]', 'Elap. time [sec]'], floatfmt=".6f"))
-    log.info('')
-    log.info('Total elapsed time: ' + str(datetime.timedelta(seconds = sum([i._last_energy['time'] for i in conformers if i.active]))))
+    log.info('\nEnded Calculations\n')
+    create_summary('Summary', conformers, log)
+    log.info('\nTotal elapsed time: ' + str(datetime.timedelta(seconds = sum([i._last_energy['time'] for i in conformers if i.active]))))
 
     log.info('Start Pruning')
     conformers = check_ensemble(conformers, p, log)
     save_snapshot(f'ensemble_after_{p.number}.xyz', conformers, log)
+
+    create_summary('Summary', conformers, log)
+
 
     log.info(f'{"="*15}\nEND PROTOCOL {p.number}\n{"="*15}\n\n')
 
@@ -95,6 +93,15 @@ def last_protocol_completed(conf, idx:int):
         # i for i in conf if i.energies.get(int(idx)) is not None and i.active
         tmp
     ]) == 0
+
+
+def create_summary(title, conformers, log):
+    log.info(title)
+    log.info('')
+    log.info(tabulate([i.create_log() for i in conformers if i.active], headers=['Conformers', 'E[Eh]' ,'G[Eh]', 'B[cm-1]', 'E. Rel [kcal/mol]', 'Pop [%]', 'Elap. time [sec]'], floatfmt=".6f"))
+    log.info('')
+
+    return None
 
 
 
@@ -118,9 +125,7 @@ def start_calculation(conformers, protocol, cpu:int, temperature: float, start_f
     save_snapshot('final_ensemble.xyz', conformers, log)
     log.info(f'{"="*15}\nCALCULATIONS ENDED\n{"="*15}\n\n')
 
-    log.info('Final Summary')
-    log.info(tabulate([i.create_log() for i in conformers if i.active], headers=['Conformers', 'E[Eh]' ,'G[Eh]', 'B[cm-1]', 'E. Rel [kcal/mol]', 'Pop [%]', 'Elap. time [sec]'], floatfmt=".6f"))
-    log.info('')
+    create_summary('Final Summary', conformers, log)
 
     return None
 
