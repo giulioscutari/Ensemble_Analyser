@@ -6,7 +6,7 @@ from scipy.constants import R, h, c, Boltzmann, N_A
 from scipy.constants import physical_constants
 
 
-import cclib
+#  import cclib
 c = c*100 # convert speed of light in cm/s
 J_TO_H = physical_constants['joule-hartree relationship'][0]
 AMU_TO_KG = physical_constants['atomic mass constant'][0]

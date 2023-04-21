@@ -47,7 +47,7 @@ def launch(idx, conf, protocol, cpu, log, temp, ensemble):
         raise RuntimeError('Some sort of error have been encountered during the calculation of the calcultor.')
 
 
-    get_conf_parameters(conf, protocol.number, end-st, temp, log)
+    get_conf_parameters(conf, protocol.number, protocol, end-st, temp, log)
 
     json.dump({i.number: i.__dict__ for i in ensemble}, open('checkpoint.json', 'w'), indent=4, cls=SerialiseEncoder)
 
@@ -72,7 +72,7 @@ def run_protocol(conformers, p, temperature, cpu, log):
     log.info('')
     log.info('Summary')
     log.info('')
-    log.info(tabulate([i.create_log() for i in conformers if i.active], headers=['conformers', 'E[Eh]' ,'G[Eh]', 'B[cm-1]', 'E. Rel [kcal/mol]', 'Pop [%]', 'Elap. time [sec]'], floatfmt=".6f"))
+    log.info(tabulate([i.create_log() for i in conformers if i.active], headers=['Conformers', 'E[Eh]' ,'G[Eh]', 'B[cm-1]', 'E. Rel [kcal/mol]', 'Pop [%]', 'Elap. time [sec]'], floatfmt=".6f"))
     log.info('')
     log.info('Total elapsed time: ' + str(datetime.timedelta(seconds = sum([i._last_energy['time'] for i in conformers if i.active]))))
 
@@ -118,7 +118,9 @@ def start_calculation(conformers, protocol, cpu:int, temperature: float, start_f
     save_snapshot('final_ensemble.xyz', conformers, log)
     log.info(f'{"="*15}\nCALCULATIONS ENDED\n{"="*15}\n\n')
 
-    check_ensemble(conformers, p, log)
+    log.info('Final Summary')
+    log.info(tabulate([i.create_log() for i in conformers if i.active], headers=['Conformers', 'E[Eh]' ,'G[Eh]', 'B[cm-1]', 'E. Rel [kcal/mol]', 'Pop [%]', 'Elap. time [sec]'], floatfmt=".6f"))
+    log.info('')
 
     return None
 

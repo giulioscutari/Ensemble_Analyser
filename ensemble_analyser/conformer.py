@@ -33,6 +33,13 @@ class Conformer:
         )
 
     @property
+    def weight_mass(self):
+        return np.sum(Atoms(
+            symbols = ''.join(list(self.atoms)),
+            positions = self.last_geometry,
+        ).get_masses())
+
+    @property
     def rotatory(self):
         return self.energies[list(self.energies.keys())[-1]]['B']
     
