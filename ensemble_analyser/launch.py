@@ -71,11 +71,12 @@ def run_protocol(conformers, p, temperature, cpu, log):
     create_summary('Summary', conformers, log)
     log.info('\nTotal elapsed time: ' + str(datetime.timedelta(seconds = sum([i._last_energy['time'] for i in conformers if i.active]))))
 
-    log.info('Start Pruning')
+    log.debug('Start Pruning')
     conformers = check_ensemble(conformers, p, log)
     save_snapshot(f'ensemble_after_{p.number}.xyz', conformers, log)
 
-    create_summary('Summary', conformers, log)
+
+    create_summary('Summary After Pruning', conformers, log)
 
 
     log.info(f'{"="*15}\nEND PROTOCOL {p.number}\n{"="*15}\n\n')
@@ -115,6 +116,7 @@ def start_calculation(conformers, protocol, cpu:int, temperature: float, start_f
     if start_from != 0:
         if last_protocol_completed(conformers, start_from):
             conformers = check_ensemble(conformers, protocol[start_from], log)
+            create_summary('Summary', conformers, log)
 
     for p in protocol[start_from:]:
         with open('last_protocol', 'w') as f:
@@ -125,6 +127,7 @@ def start_calculation(conformers, protocol, cpu:int, temperature: float, start_f
     save_snapshot('final_ensemble.xyz', conformers, log)
     log.info(f'{"="*15}\nCALCULATIONS ENDED\n{"="*15}\n\n')
 
+    calculate_rel_energies(conformers, temperature)
     create_summary('Final Summary', conformers, log)
 
     return None

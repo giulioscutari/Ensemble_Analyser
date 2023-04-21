@@ -59,7 +59,7 @@ class Conformer:
         
     def write_xyz(self):
         if not self.active: return ''
-        txt = f'{len(self.atoms)}\nCONFORMER {self.number} {"G : {:.6f} Eh".format(self._last_energy["G"]) if self._last_energy["G"] else "E : {:.6f} Eh".format(self._last_energy["E"])}\n'
+        txt = f'{len(self.atoms)}\nCONFORMER {self.number} {"G : {:.6f} kcal/mol".format(self._last_energy["G"]) if self._last_energy["G"] else "E : {:.6f} kcal/mol".format(self._last_energy["E"])}\n'
         for a, pos in zip(self.atoms, self.last_geometry):
             x, y, z = pos
             txt += f' {a}\t{x:14f}\t{y:14f}\t{z:14f}\n'
