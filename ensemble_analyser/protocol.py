@@ -143,7 +143,7 @@ class Protocol:
             number = json['number'],
             functional = json['functional'],
             basis = json['basis'],
-            solvent = Solvent(json['solvent']),
+            solvent = Solvent(json['solvent']) if json['solvent'] else None ,
             opt = json['opt'],
             freq = json['freq'], 
             add_input = json['add_input'],

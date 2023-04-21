@@ -91,8 +91,6 @@ def last_protocol_completed(conf, idx:int):
         if i.energies.get(int(idx)) is not None and i.active:
             tmp.append(i)
 
-    print(tmp)
-
     return len([
         # i for i in conf if i.energies.get(int(idx)) is not None and i.active
         tmp
@@ -119,6 +117,8 @@ def start_calculation(conformers, protocol, cpu:int, temperature: float, start_f
 
     save_snapshot('final_ensemble.xyz', conformers, log)
     log.info(f'{"="*15}\nCALCULATIONS ENDED\n{"="*15}\n\n')
+
+    check_ensemble(conformers, p, log)
 
     return None
 
