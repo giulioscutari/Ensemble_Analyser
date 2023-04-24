@@ -49,6 +49,9 @@ def print_help_threshold():
 
 
 def parser_arguments():
+    """
+    Argparse argument parse
+    """
 
     parser = argparse.ArgumentParser(
         prog='Ensemble Analyser',

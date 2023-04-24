@@ -19,6 +19,13 @@ import os
 
 
 def launch(idx, conf, protocol, cpu, log, temp, ensemble):
+    """
+    Run the calculation for each conformer
+    
+    idx | int : index of the calculation
+    conf | Conformer : conformer instance
+    protocol 
+    """
 
     log.info(f'{idx}. Running {ordinal(int(protocol.number))} PROTOCOL -> CONF{conf.number}')
     try:
@@ -53,7 +60,19 @@ def launch(idx, conf, protocol, cpu, log, temp, ensemble):
 
 
 
-def run_protocol(conformers, p, temperature, cpu, log):
+def run_protocol(conformers, p, temperature, cpu, log) -> None:
+    """
+    Run the protocol for each conformer
+    
+    conformers | list : whole ensemble list
+    p | Protocol : protocol information
+    temperature | float : temperature [K]
+    cpu | int : cpu to allocate 
+    log : logger instance
+
+    return None
+    """
+
     log.info(f'STARTING PROTOCOL {p.number}')
     log.info(f'\nActive conformers for this phase: {len([i for i in conformers if i.active])}\n')
     count = 1
@@ -81,9 +100,18 @@ def run_protocol(conformers, p, temperature, cpu, log):
 
     log.info(f'{"="*15}\nEND PROTOCOL {p.number}\n{"="*15}\n\n')
 
+    return None
 
 
-def last_protocol_completed(conf, idx:int):
+def last_protocol_completed(conf, idx:int) -> bool:
+    """
+    Getting if all the conformers have been calculated until the idx-th protocol
+
+    conf | list : whole ensemble list
+    idx | int : index of the last protocol executed
+
+    return | bool
+    """
 
     tmp = []
     for i in conf: 
@@ -97,6 +125,14 @@ def last_protocol_completed(conf, idx:int):
 
 
 def create_summary(title, conformers, log):
+    """
+    Create the summary of a ensemble information
+    
+    title | str : title of the summary
+    conformers | list : whole ensemble list
+    log : logger instance
+    """
+
     log.info(title)
     log.info('')
     log.info(tabulate([i.create_log() for i in conformers if i.active], headers=['Conformers', 'E[Eh]' ,'G[Eh]', 'B[cm-1]', 'E. Rel [kcal/mol]', 'Pop [%]', 'Elap. time [sec]'], floatfmt=".6f"))
@@ -106,13 +142,19 @@ def create_summary(title, conformers, log):
 
 
 
-def start_calculation(conformers, protocol, cpu:int, temperature: float, start_from: int, log):
+def start_calculation(conformers, protocol, cpu:int, temperature: float, start_from: int, log) -> None:
+    """
+    Main calculation loop
 
-    log.debug('# Reading protocol and threshold files')
+    conformers | list : whole ensemble list
+    protocol | list : whole protocol steps
+    cpu | int : cpu allocated
+    temperature | float : temperature [K]
+    start_from | int : index of the last protocol executed
+    log : logger instance
 
-
-    log.debug('# Reading ensemble file')
-
+    return None
+    """
     if start_from != 0:
         if last_protocol_completed(conformers, start_from):
             conformers = check_ensemble(conformers, protocol[start_from], log)
@@ -121,7 +163,6 @@ def start_calculation(conformers, protocol, cpu:int, temperature: float, start_f
     for p in protocol[start_from:]:
         with open('last_protocol', 'w') as f:
             f.write(str(p.number))
-
         run_protocol(conformers, p, temperature, cpu, log)
 
     save_snapshot('final_ensemble.xyz', conformers, log)
@@ -134,8 +175,12 @@ def start_calculation(conformers, protocol, cpu:int, temperature: float, start_f
 
 
 
-def restart():
-
+def restart() -> tuple:
+    """
+    Reload ensemble, protocol and setting from previous calculation
+    
+    return | list, list, int
+    """
     confs = json.load(open('checkpoint.json'))
     ensemble = [Conformer.load_raw(confs[i]) for i in confs]
 
@@ -149,7 +194,17 @@ def restart():
 
 
 
-def create_protocol(p, thrs, log):
+def create_protocol(p, thrs, log) -> list:
+    """
+    Create the steps for the protocol to be executed
+
+    p | dict : JSON read file of the protocol
+    thrs | dict : JSON read file of the thresholds
+    log : logger instance
+
+    return | list : protocol steps
+    """
+
     protocol = []
 
     log.info('Loading Protocol\n')
@@ -169,7 +224,7 @@ def create_protocol(p, thrs, log):
         thrGMAX = d.get('thrGMAX', None)
 
         if not func:
-            log.critical(f"{'='*20}\nCRITICAL ERROR\n{'='*20}\nFUNC key must be passed in order to calculate energy. DFT functional or HF for Hartree-Fock calculation or semi-empirical methods (XTB1/XTB2/PM3/AM1 or similar supported by the calculator) (Probelm at {ordinal(int(idx))} protocol definition)\n{'='*20}\n")
+            log.critical(f"{'='*20}\nCRITICAL ERROR\n{'='*20}\nFUNC key must be passed in order to calculate energy. DFT functional or HF for Hartree-Fock calculation or semi-empirical methods (XTB1/XTB2/PM3/AM1 or similar supported by the calculator) (Problem at {ordinal(int(idx))} protocol definition)\n{'='*20}\n")
             raise IOError('There is an error in the input file with the definition of the functional. See the output file.')
 
         protocol.append(Protocol(number =idx, functional=func, basis=basis, solvent= solv, opt= opt, freq= freq, add_input = add_input, thrs_json= thrs, thrG = thrG, thrB = thrB, thrGMAX = thrGMAX))
@@ -178,26 +233,35 @@ def create_protocol(p, thrs, log):
     return protocol
 
 def main():
+    """
+    Main script loop
+    """
+
     args = parser_arguments()
 
-    try:
+
+    # Trying to reload the damped setting from a previously calculation. Else damp the settings
+
+    if os.path.exists(os.path.join(os.getcwd(), 'settings.json')):
         settings = json.load(open('settings.json'))
-    except FileNotFoundError:
+    else:
         settings = {
             'output' : args.output,
             'cpu' : args.cpu,
             'temperature' : args.temperature,
         }
         json.dump(settings, open('settings.json', 'w'), indent=4)
-
+    
+    # create the setting dictionary
     output = settings.get('output', args.output) if not args.restart else ''.join(settings.get('output', args.output).split('.')[:-1])+'_restart.out'
     cpu = settings.get('cpu', args.cpu)
     temperature = settings.get('temperature', args.temperature)
 
-
+    # initiate the log
     log = create_log(output)
 
     if args.restart:
+        # reload the previous information from checkpoint file
         conformers, protocol, start_from = restart()
 
     else:
@@ -206,6 +270,7 @@ def main():
         json.dump({i.number: i.__dict__ for i in protocol}, open('protocol_dump.json', 'w'), indent=4, cls=SerialiseEncoder)
         conformers = read_ensemble(args.ensemble, args.charge, args.multiplicity, log)
 
+    # start the loop
     start_calculation(
         conformers = conformers,
         protocol = protocol,

@@ -3,7 +3,14 @@ import shutil, json
 import os
 
 
-def _parse_xyz_str(fl):
+def _parse_xyz_str(fl) -> tuple:
+    """
+    Parse an xyz geom descriptor
+
+    fl | str : string of the file splitted in a single geometry
+
+    return | tuple : list of atoms, XYZ position of the atoms
+    """
     fl = fl[2:]
     atoms, geom = [] , []
     for line in fl:
@@ -14,7 +21,14 @@ def _parse_xyz_str(fl):
 
 
 
-def mkdir(directory:str):
+def mkdir(directory:str) -> None:
+    """
+    Create a directory, raising an error if the directory already exists
+
+    directory | str : directory name
+
+    return None
+    """
     if os.path.exists(directory):
         raise IOError(f'Directory {directory} already exists. Going to exit!')
         shutil.rmtree(directory)

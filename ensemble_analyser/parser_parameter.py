@@ -1,7 +1,6 @@
 
 
-# import cclib
-import re, os, sys
+import re, os
 import numpy as np
 from ensemble_analyser.rrho import free_gibbs_energy
 
@@ -41,9 +40,19 @@ def get_freq(fl):
     return freq
 
 
-def get_conf_parameters(conf, number, p, time, temp, log):
+def get_conf_parameters(conf, number, p, time, temp, log) -> None:
+    """
+    Obtain the parameters for a conformer: E, G, B, m
+    
+    conf | Conformer : conformer
+    number | int : protocol number
+    p | Protocol : protocol executed
+    time | datetime : elapsed time requested for the calculation
+    temp | float : temperature [K]
+    log : logger instance
 
-    # data = cclib.io.ccread(os.path.join(conf.folder, f'protocol_{number}.out'))
+    return | None
+    """
 
     with open(os.path.join(conf.folder, f'protocol_{number}.out')) as f:
         fl = f.readlines() 
@@ -70,8 +79,6 @@ def get_conf_parameters(conf, number, p, time, temp, log):
             B = B,
             m=conf.mult
             )
-        
-        print(g)
 
 
     conf.energies[int(number)] = {

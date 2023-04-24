@@ -28,6 +28,10 @@ LEVEL_DEFINITION = {
 
 
 class Solvent: 
+    """
+    Solvent class
+    """
+
     def __init__(self, solv:dict):
         self.solvent = solv['solvent']
         self.smd = solv['smd']
@@ -80,6 +84,14 @@ class Protocol:
         return c
 
     def get_calculator(self, cpu, charge:int, mult:int):
+        """
+        Get the calculator from the user selector
+        
+        cpu | int : allocated CPU
+        charge | int : charge of the molecule
+        mult | int : multiplicity of the molecule
+        """
+
         calc = {
             'orca' : self.get_orca_calculator(cpu, charge, mult)
         }
@@ -88,6 +100,11 @@ class Protocol:
         
 
     def get_thrs(self, thr_json):
+        """
+        Get default thrs if not defined by user
+        
+        thr_json | dict : JSON default thresholds
+        """
         c = LEVEL_DEFINITION[self.number_level]
         if not self.thrG: self.thrG = thr_json[c]['thrG']
         if not self.thrB: self.thrB = thr_json[c]['thrB']
