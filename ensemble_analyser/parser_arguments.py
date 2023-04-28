@@ -10,10 +10,12 @@ def print_help_protocol():
     example = json.dumps(
         {
         "0": {
-                "func": "str: DEFINE THE DFT FUNCTIONAL",
+                "functional": "str: DEFINE THE DFT FUNCTIONAL",
                 "basis": "str: DEFINE THE BASIS SET FOR THE CALCULATION. DEFAULT: def2-svp",
                 "opt": "bool: TRUE IF WANT TO OPTIMIZE. DEFAULT: False",
                 "freq": "bool: TRUE IF WANT ANALYTICAL FREQUENCY CALCULATION. DEFAULT: False",
+                "freq_fact": "float: FREQUENCY SCALE FACTOR",
+                "graph" : "bool : TRUE IF WANT SIMULATION OF ELECTRONIC GRAPH",
                 "solv": {
                     "solvent": "str|null: NAME OF THE SOLVENT. IF GAS PHASE DEFINE AS NULL",
                     "smd": "bool: TRUE IF SMD MODEL EMPLOYED FOR IMPLICIT CALCULATION, ELSE CPCM USE",

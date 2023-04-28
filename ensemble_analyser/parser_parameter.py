@@ -15,13 +15,13 @@ def get_param(x, calculator, param):
         return x
 
 
-def get_freq(fl):
+def get_freq(fl, calc):
     """
-    ORCA parsing for frequencies
+    Parsing for frequencies
     """
 
-    fl = '\n'.join(''.join(fl).split('VIBRATIONAL FREQUENCIES')[-1].strip().splitlines()[4:]).split('------------')[0].strip().splitlines()
-    freq = np.array([float(i.split()[1]) for i in fl if float(i.split()[1]) != 0.0 ])
+    fl = '\n'.join(''.join(fl).split(regex_parsing[calc]['s_freq'])[-1].strip().splitlines()[4:]).split(regex_parsing[calc]['e_freq'])[0].strip().splitlines()
+    freq = np.array([float(i.split()[regex_parsing[calc]['idx_freq']]) for i in fl if float(i.split()[regex_parsing[calc]['idx_freq']]) != 0.0 ])
     return freq
 
 
@@ -46,7 +46,7 @@ def get_conf_parameters(conf, number, p, time, temp, log) -> None:
 
     freq = np.array([])
     if p.freq:
-        freq = get_freq(fl) * p.freq_fact
+        freq = get_freq(fl, p.calculator) * p.freq_fact
         if freq.size == 0:
             log.error(('\n'.join(fl[-6:])).strip())
             raise RuntimeError('Some sort of error have been encountered during the calculation of the calcultor.')
