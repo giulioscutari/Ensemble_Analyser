@@ -138,3 +138,4 @@ output*.out
 conf_*/
 *json
 last_protocol
+*dat
