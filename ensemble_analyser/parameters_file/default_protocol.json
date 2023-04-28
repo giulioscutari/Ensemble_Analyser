@@ -45,6 +45,10 @@
         "opt": false,
         "freq": false,
         "graph": true, 
-        "add_input": "%tddft nroots 30 tda false end"
+        "add_input": "%tddft nroots 30 tda false end", 
+        "solvent" : {
+            "solvent": "acetonitrile",
+            "smd":false
+        }
     }
 }
