@@ -87,7 +87,7 @@ class Protocol:
         return | dict : thresholds
         """
 
-        default = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'ensemble_analyser', 'parameters_file','default_threshold.json')
+        default = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'parameters_file','default_threshold.json')
         return json.load(open(default))
 
     def get_calculator(self, cpu, charge:int, mult:int):
