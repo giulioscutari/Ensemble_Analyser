@@ -6,7 +6,7 @@ from tabulate import tabulate
 import numpy as np
 
 
-from ensemble_analyser.logger import save_snapshot, DEBUG
+from ensemble_analyser.logger import save_snapshot, DEBUG, ordinal
 
 
 def cut_over_thr_max(confs: list, thrGMAX: float, log) -> list:
@@ -127,6 +127,10 @@ def check_ensemble(confs, protocol, log) -> list:
     return | list : ensemble pruned with conformers deactivated
     """
 
+    if protocol.graph: 
+        log.info(f'Since graph calculation is detected in this part ({ordinal(int(protocol.number))}), PRUNING NOT EXECUTED')
+        return confs
+
     cut_over_thr_max(confs, protocol.thrGMAX, log)
 
     if DEBUG:
@@ -139,10 +143,10 @@ def check_ensemble(confs, protocol, log) -> list:
         if not i.active:
             continue  # Not check the non active conformers
         for j in range(0, idx):
-            if check(i, confs[j], protocol, controller, log):
+            if check(i, confs[j], protocol, controller):
                 break
 
-    controller = refactor_dict(controller, log)
+    controller = refactor_dict(controller)
 
     log.info('')
     log.info(tabulate(controller, headers="keys", floatfmt=".3f"))

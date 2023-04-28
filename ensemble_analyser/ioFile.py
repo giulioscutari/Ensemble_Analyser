@@ -19,7 +19,7 @@ def convert_file(file) -> str:
     return output
 
 
-def read_ensemble(file, charge, multiplicity) -> list:
+def read_ensemble(file, charge, multiplicity, log) -> list:
     """
     Read the initial ensemble and return the ensemble list
     Not only XYZ file is supported. OBABEL is required
@@ -27,6 +27,7 @@ def read_ensemble(file, charge, multiplicity) -> list:
     file | str : initial ensemble file 
     charge | int : charge of the molecule
     multiplicity | int : multiplicity of the molecule
+    log : logger instance
 
     return | list : whole ensemble list as Conformer instances
     """

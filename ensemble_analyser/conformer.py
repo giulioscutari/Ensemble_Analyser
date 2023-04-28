@@ -21,7 +21,7 @@ class Conformer:
         self.atoms = atoms
         self.energies = {}
         self.active = True
-        
+
         # IO
         self.folder = f'conf_{self.number}'
         if not raw: mkdir(self.folder)

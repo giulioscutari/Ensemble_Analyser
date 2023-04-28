@@ -6,9 +6,9 @@ from ensemble_analyser.logger import create_log, ordinal, save_snapshot
 from ensemble_analyser.parser_arguments import parser_arguments
 from ensemble_analyser.parser_parameter import get_conf_parameters
 from ensemble_analyser.IOsystem import SerialiseEncoder
-from ensemble_analyser.protocol import Protocol, Solvent, load_protocol, load_threshold
+from ensemble_analyser.protocol import Protocol, load_protocol
 from ensemble_analyser.pruning import calculate_rel_energies, check_ensemble
-
+from ensemble_analyser.grapher import Graph
 
 import ase
 import time, json
@@ -164,6 +164,8 @@ def start_calculation(conformers, protocol, cpu:int, temperature: float, start_f
         with open('last_protocol', 'w') as f:
             f.write(str(p.number))
         run_protocol(conformers, p, temperature, cpu, log)
+        if p.graph: 
+            Graph(conformers, p, log, temperature)
 
     save_snapshot('final_ensemble.xyz', conformers, log)
     log.info(f'{"="*15}\nCALCULATIONS ENDED\n{"="*15}\n\n')
@@ -185,7 +187,7 @@ def restart() -> tuple:
     ensemble = [Conformer.load_raw(confs[i]) for i in confs]
 
     p = json.load(open('protocol_dump.json'))
-    protocol = [Protocol.load_raw(p[i]) for i in p]
+    protocol = [Protocol(**p[i]) for i in p]
 
     with open('last_protocol') as f:
         start_from = int(f.readlines()[0])
@@ -194,7 +196,7 @@ def restart() -> tuple:
 
 
 
-def create_protocol(p, thrs, log) -> list:
+def create_protocol(p, log) -> list:
     """
     Create the steps for the protocol to be executed
 
@@ -209,25 +211,22 @@ def create_protocol(p, thrs, log) -> list:
 
     log.info('Loading Protocol\n')
     for idx, d in p.items():
-        func    = d.get('func', None)
-        basis   = d.get('basis', 'def2-svp')
-        opt     = d.get('opt', False)
-        freq    = d.get('freq', False)
-
+        func    = d.get('functional', None)
         add_input = d.get('add_input', '')
-
-        solv    = d.get('solv', None)
-        if solv or d.get('solvent', None): solv = Solvent(solv)
-
-        thrG    = d.get('thrG', None)
-        thrB    = d.get('thrB', None)
-        thrGMAX = d.get('thrGMAX', None)
+        graph = d.get('graph', False)
 
         if not func:
             log.critical(f"{'='*20}\nCRITICAL ERROR\n{'='*20}\nFUNC key must be passed in order to calculate energy. DFT functional or HF for Hartree-Fock calculation or semi-empirical methods (XTB1/XTB2/PM3/AM1 or similar supported by the calculator) (Problem at {ordinal(int(idx))} protocol definition)\n{'='*20}\n")
             raise IOError('There is an error in the input file with the definition of the functional. See the output file.')
+        
+        if graph:
+            if not add_input:
+                log.critical(f"{'='*20}\nCRITICAL ERROR\n{'='*20}\nADD_INPUT must be set so the proper calculation (TD-DFT or CASSCF/RASSCF) to simulate the electronic spectra (Problem at {ordinal(int(idx))} protocol definition)\n{'='*20}\n")
+                raise IOError('There is an error in the input file with the definition of the functional. See the output file.')
 
-        protocol.append(Protocol(number =idx, functional=func, basis=basis, solvent= solv, opt= opt, freq= freq, add_input = add_input, thrs_json= thrs, thrG = thrG, thrB = thrB, thrGMAX = thrGMAX))
+        protocol.append(Protocol(
+            number=idx, **d
+            ))
 
     log.info('\n'.join((f"{i.number}: {str(i)} - {i.calculation_level}\n {i.thr}" for i in protocol)) + '\n')
     return protocol
@@ -265,7 +264,7 @@ def main():
         conformers, protocol, start_from = restart()
 
     else:
-        protocol = create_protocol(load_protocol(args.protocol), load_threshold(args.threshold), log)
+        protocol = create_protocol(load_protocol(args.protocol), log)
         start_from = protocol[0].number
         json.dump({i.number: i.__dict__ for i in protocol}, open('protocol_dump.json', 'w'), indent=4, cls=SerialiseEncoder)
         conformers = read_ensemble(args.ensemble, args.charge, args.multiplicity, log)

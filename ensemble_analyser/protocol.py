@@ -12,18 +12,12 @@ def load_protocol(file:str):
     default = 'ensemble_analyser/parameters_file/default_protocol.json'
     return json.load(open(default if not file else file ))
 
-def load_threshold(file:str):
-    default = 'ensemble_analyser/parameters_file/default_threshold.json'
-    return json.load(open(default if not file else file ))
-
-
-
 
 LEVEL_DEFINITION = {
     0 : 'SP'.lower()          , # mere energy calculation
     1 : 'OPT'.lower()         , # optimisation step
     2 : 'FREQ'.lower()        , # single point and frequency analysis
-    3 : 'OPT+FREQ'.lower()      # optimisation and frequency analysis
+    3 : 'OPT+FREQ'.lower()    , # optimisation and frequency analysis
 }
 
 
@@ -37,9 +31,9 @@ class Solvent:
         self.smd = solv['smd']
 
     def __str__(self):
-        return f' - SMD({self.solvent})' if self.smd else  f' - CPCM({self.solvent})'
+        return f'SMD({self.solvent})' if self.smd else  f'CPCM({self.solvent})'
     def __repr__(self):
-        return f' - SMD({self.solvent})' if self.smd else  f' - CPCM({self.solvent})'
+        return f'SMD({self.solvent})' if self.smd else  f'CPCM({self.solvent})'
 
     def orca_input_smd(self):
         if self.smd:
@@ -49,20 +43,23 @@ class Solvent:
 
 class Protocol: 
 
-    def __init__(self, number:int, functional:str, basis:str, solvent:Solvent, opt:bool, freq:bool, add_input:str , thrs_json, calculator='orca', thrG: float = None, thrB: float = None, thrGMAX: float = None):
+    def __init__(self, number : int , functional:str, basis : str = 'def2-svp', solvent = {}, opt:bool = False, freq:bool = False, add_input:str = '', freq_fact : float = 1, graph : bool = False, calculator='orca', thrG: float = None, thrB: float = None, thrGMAX: float = None):
 
         self.number = number
         self.functional = functional.upper()
         self.basis = basis.upper()
-        self.solvent = solvent
+        self.solvent = Solvent(solvent) if solvent else None
         self.opt = opt
         self.freq = freq
         self.add_input = add_input
         self.thrG = thrG
         self.thrB = thrB
         self.thrGMAX = thrGMAX
-        self.get_thrs(thrs_json)
+        self.get_thrs(self.load_threshold())
         self.calculator = calculator
+
+        self.freq_fact = freq_fact
+        self.graph = graph
 
     @property
     def calculation_level(self):
@@ -82,6 +79,16 @@ class Protocol:
         if self.opt: c += 1
         if self.freq: c += 2
         return c
+
+    def load_threshold(self) -> dict:
+        """
+        Load default thresholds
+        
+        return | dict : thresholds
+        """
+
+        default = 'ensemble_analyser/parameters_file/default_threshold.json'
+        return json.load(open(default))
 
     def get_calculator(self, cpu, charge:int, mult:int):
         """
@@ -156,6 +163,7 @@ class Protocol:
     
     @staticmethod
     def load_raw(json):
+        
         return Protocol(
             number = json['number'],
             functional = json['functional'],
@@ -168,7 +176,9 @@ class Protocol:
             thrs_json = None, 
             thrB=json['thrB'], 
             thrG=json['thrG'], 
-            thrGMAX=json['thrGMAX']
+            thrGMAX=json['thrGMAX'],
+            freq_fact=json['freq_fact'],
+            graph=json['graph']
         )
 
 

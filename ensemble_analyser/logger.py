@@ -5,7 +5,7 @@ import os, sys
 
 LOG_FORMAT = "%(message)s"
 
-DEBUG = os.getenv('DEBUG')
+DEBUG = bool(os.getenv('DEBUG'))
 
 ordinal = lambda n: "%d-%s" % (n,"tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4])
 
@@ -44,8 +44,10 @@ def create_log(output):
     )
 
     log = logging.getLogger()
-    sys.stdout = StreamToLogger(log,logging.INFO)
+    # sys.stdout = StreamToLogger(log,logging.INFO)
     sys.stderr = StreamToLogger(log,logging.ERROR)
+
+    log.warning(f'The is in debug mode: {DEBUG}')
 
     return logging.getLogger()
 

@@ -2,31 +2,16 @@
 
 import re, os
 import numpy as np
+from ensemble_analyser.regex_parsing import regex_parsing
 from ensemble_analyser.rrho import free_gibbs_energy
 
 EH_TO_KCAL = 627.5096080305927
 
-
-
-def parse_rotational_const(x):
+def get_param(x, calculator, param):
     """
-    ORCA parsing for Rotational Constant
+    Parsing for Rotational Constant
     """
-    if re.search('Rotational constants in cm-1', x):
-        return x
-    
-def parse_dipole_moment(x):
-    """
-    ORCA parsing for Dipole Moment
-    """
-    if re.search('Total Dipole Moment', x):
-        return x
-    
-def parse_single_point_energy(x):
-    """
-    ORCA parsing for single point energy (SCF + Dispersion + Solvation)
-    """
-    if re.search('FINAL SINGLE POINT ENERGY', x):
+    if re.search(regex_parsing[calculator][param], x):
         return x
 
 
@@ -57,19 +42,19 @@ def get_conf_parameters(conf, number, p, time, temp, log) -> None:
     with open(os.path.join(conf.folder, f'protocol_{number}.out')) as f:
         fl = f.readlines() 
 
-    e = float(list(filter(parse_single_point_energy, fl))[-1].strip().split()[-1])    
+    e = float(list(filter(lambda x: get_param(x, p.calculator, 'E'), fl))[-1].strip().split()[-1])    
 
     freq = np.array([])
     if p.freq:
-        freq = get_freq(fl)
+        freq = get_freq(fl) * p.freq_fact
         if freq.size == 0:
             log.error(('\n'.join(fl[-6:])).strip())
             raise RuntimeError('Some sort of error have been encountered during the calculation of the calcultor.')
     
-    B = np.array(list(filter(parse_rotational_const, fl))[-1].strip().split(':')[-1].split(), dtype=float)
+    B = np.array(list(filter(lambda x: get_param(x, p.calculator, 'B'), fl))[-1].strip().split(':')[-1].split(), dtype=float)
     b = np.linalg.norm(B)
 
-    M = np.linalg.norm(np.array(list(filter(parse_dipole_moment, fl))[-1].strip().split(':')[-1].split(), dtype=float))
+    M = np.linalg.norm(np.array(list(filter(lambda x: get_param(x, p.calculator, 'm'), fl))[-1].strip().split(':')[-1].split(), dtype=float))
 
     g = ''
     if freq.size > 0:
@@ -81,7 +66,7 @@ def get_conf_parameters(conf, number, p, time, temp, log) -> None:
             )
 
 
-    conf.energies[int(number)] = {
+    conf.energies[str(number)] = {
         'E' : e * EH_TO_KCAL if e else e,    #   Electronic Energy [kcal/mol]
         'G' : g * EH_TO_KCAL if g else None, #   Free Gibbs Energy [kcal/mol]
         'B' : b if b else None,                 #   Rotatory Constant [cm-1]
