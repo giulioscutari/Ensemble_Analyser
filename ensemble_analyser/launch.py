@@ -252,7 +252,7 @@ def main():
         json.dump(settings, open('settings.json', 'w'), indent=4)
     
     # create the setting dictionary
-    output = settings.get('output', args.output) if not args.restart else ''.join(settings.get('output', args.output).split('.')[:-1])+'_restart.out'
+    output = settings.get('output', args.output) if not args.restart else '.'.join(settings.get('output', args.output).split('.')[:-1])+'_restart.out'
     cpu = settings.get('cpu', args.cpu)
     temperature = settings.get('temperature', args.temperature)
 
