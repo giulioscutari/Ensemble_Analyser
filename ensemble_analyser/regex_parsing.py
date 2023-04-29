@@ -21,5 +21,8 @@ State  Energy     Wavelength     R         MX        MY        MZ
         'idx_imp_UV': 3,
         'idx_en_ECD': 2, 
         'idx_imp_ECD': 3,
+        's_freq' : "VIBRATIONAL FREQUENCIES",
+        'e_freq' : "------------",
+        'idx_freq' : 1
     }
 }
