@@ -149,7 +149,6 @@ class Graph:
         sigma | float : dispersion for the gaussian convolution [eV]
         fname | str : the name of the file to store the graph
         save | bool : save the .dat file for each conformer
-
         return | np.array (1D array) : Convoluted and weighted spectra
         """
         
@@ -192,3 +191,16 @@ class Graph:
         if not is_ev:
             return FACTOR_EV_NM/arr[:, 0], arr[:, 1]
         return arr[:, 0], arr[:, 1]
+    
+
+    def normalise(self, y, norm=1) -> np.array: 
+        """
+        Normalize an ensemble between 1 and -1, if not set otherwise.
+
+        y | np.array : 1D array
+        norm | float : max value to normalize at
+
+        return | np.array : 1D normalized array
+        """
+        return y / (np.max([np.max(y), np.min(y) * (-1 if np.min(y)<0 else 1)])) * norm 
+    

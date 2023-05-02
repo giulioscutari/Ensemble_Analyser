@@ -1,8 +1,8 @@
 
 
 from ensemble_analyser.conformer import Conformer
-from ensemble_analyser.ioFile import read_ensemble
-from ensemble_analyser.logger import create_log, ordinal, save_snapshot
+from ensemble_analyser.ioFile import read_ensemble, save_snapshot
+from ensemble_analyser.logger import create_log, ordinal
 from ensemble_analyser.parser_arguments import parser_arguments
 from ensemble_analyser.parser_parameter import get_conf_parameters
 from ensemble_analyser.IOsystem import SerialiseEncoder
@@ -17,14 +17,21 @@ from tabulate import tabulate
 import os
 
 
+MAX_TRY = 5 
 
-def launch(idx, conf, protocol, cpu, log, temp, ensemble):
+def launch(idx, conf, protocol, cpu, log, temp, ensemble, try_num : int = 1) -> None:
     """
     Run the calculation for each conformer
     
     idx | int : index of the calculation
     conf | Conformer : conformer instance
-    protocol 
+    protocol | Protocol : protocol instance
+    cpu | int : number of cpu to allocate
+    log : logger instance
+    temp | float : temperature [K]
+    ensemble | list : whole ensemble list
+
+    return None
     """
 
     log.info(f'{idx}. Running {ordinal(int(protocol.number))} PROTOCOL -> CONF{conf.number}')
@@ -47,14 +54,21 @@ def launch(idx, conf, protocol, cpu, log, temp, ensemble):
 
 
     except ase.calculators.calculator.CalculationFailed:
-        log.error(f'Calulator error.')
         with open(f'{label}.out') as f:
             fl = f.read()
         log.error('\n'.join(fl.splitlines()[-6:-3]))
-        raise RuntimeError('Some sort of error have been encountered during the calculation of the calcultor.')
+        log.critical(f"\n{'='*20}\nCRITICAL ERROR\n{'='*20}\nSome sort of error have been encountered during the calculation of the calculator.\n{'='*20}\nExiting\n{'='*20}\n")
+        raise RuntimeError('Some sort of error have been encountered during the calculation of the calculator.')
 
 
-    get_conf_parameters(conf, protocol.number, protocol, end-st, temp, log)
+    if not get_conf_parameters(conf, protocol.number, protocol, end-st, temp, log):
+        if try_num <= MAX_TRY: 
+            log.error(f'ERROR: During calculation of CONF_{conf.number} a server error occur and the energy could not be parsed; re-running protocol {protocol.number} on the same conformer for the {ordinal(try_num)} time')
+            time.sleep(10)
+            launch(idx, conf, protocol, cpu, log, temp, ensemble, try_num = try_num +1)
+        else:
+            log.critical(f"{'='*20}\nCRITICAL ERROR\n{'='*20}\nMax number of re-run ({MAX_TRY}) executed for CONF_{conf.number}.{'='*20}\nExiting\n{'='*20}")
+            raise RuntimeError(f'Max number of re-run ({MAX_TRY}) executed for CONF_{conf.number}. Exiting')
 
     json.dump({i.number: i.__dict__ for i in ensemble}, open('checkpoint.json', 'w'), indent=4, cls=SerialiseEncoder)
 
@@ -210,19 +224,27 @@ def create_protocol(p, log) -> list:
     protocol = []
 
     log.info('Loading Protocol\n')
+    last_prot_with_freq = None
     for idx, d in p.items():
         func    = d.get('functional', None)
         add_input = d.get('add_input', '')
         graph = d.get('graph', False)
 
         if not func:
-            log.critical(f"{'='*20}\nCRITICAL ERROR\n{'='*20}\nFUNC key must be passed in order to calculate energy. DFT functional or HF for Hartree-Fock calculation or semi-empirical methods (XTB1/XTB2/PM3/AM1 or similar supported by the calculator) (Problem at {ordinal(int(idx))} protocol definition)\n{'='*20}\n")
+            log.critical(f"{'='*20}\nCRITICAL ERROR\n{'='*20}\nFUNC key must be passed in order to calculate energy. DFT functional or HF for Hartree-Fock calculation or semi-empirical methods (XTB1/XTB2/PM3/AM1 or similar supported by the calculator) (Problem at {ordinal(int(idx))} protocol definition)\n{'='*20}\nExiting\n{'='*20}\n")
             raise IOError('There is an error in the input file with the definition of the functional. See the output file.')
         
         if graph:
             if not add_input:
-                log.critical(f"{'='*20}\nCRITICAL ERROR\n{'='*20}\nADD_INPUT must be set so the proper calculation (TD-DFT or CASSCF/RASSCF) to simulate the electronic spectra (Problem at {ordinal(int(idx))} protocol definition)\n{'='*20}\n")
+                log.critical(f"{'='*20}\nCRITICAL ERROR\n{'='*20}\nADD_INPUT must be set so the proper calculation (TD-DFT or CASSCF/RASSCF) to simulate the electronic spectra (Problem at {ordinal(int(idx))} protocol definition)\n{'='*20}\n Exiting")
                 raise IOError('There is an error in the input file with the definition of the functional. See the output file.')
+            if not last_prot_with_freq: 
+                log.critical(f"{'='*20}\nCRITICAL ERROR\n{'='*20}\nElectrical spectra requires Boltzmann population over ∆G. In the specified protocol there is NO frequency calculation turned on.\n{'='*20}\nExiting\n{'='*20}")
+            else: 
+                # check_protocol_grapher()
+                pass
+
+        if not graph and d.get('freq'): last_prot_with_freq = int(idx)
 
         protocol.append(Protocol(
             number=idx, **d

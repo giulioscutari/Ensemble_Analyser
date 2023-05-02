@@ -25,7 +25,7 @@ def get_freq(fl, calc):
     return freq
 
 
-def get_conf_parameters(conf, number, p, time, temp, log) -> None:
+def get_conf_parameters(conf, number, p, time, temp, log) -> bool:
     """
     Obtain the parameters for a conformer: E, G, B, m
     
@@ -36,20 +36,25 @@ def get_conf_parameters(conf, number, p, time, temp, log) -> None:
     temp | float : temperature [K]
     log : logger instance
 
-    return | None
+    return | bool : calculation ended correctly and not crashed due to server error
     """
 
     with open(os.path.join(conf.folder, f'protocol_{number}.out')) as f:
         fl = f.readlines() 
 
-    e = float(list(filter(lambda x: get_param(x, p.calculator, 'E'), fl))[-1].strip().split()[-1])    
-
+    try: 
+        e = float(list(filter(lambda x: get_param(x, p.calculator, 'E'), fl))[-1].strip().split()[-1])    
+    except Exception as e:
+        log.error(e)
+        return False
+    
     freq = np.array([])
     if p.freq:
         freq = get_freq(fl, p.calculator) * p.freq_fact
         if freq.size == 0:
             log.error(('\n'.join(fl[-6:])).strip())
-            raise RuntimeError('Some sort of error have been encountered during the calculation of the calcultor.')
+            log.critical(f"{'='*20}\nCRITICAL ERROR\n{'='*20}\nNo frequency present in the calculation output.\n{'='*20}\nExiting\n{'='*20}\n")
+            raise IOError('No frequency in the output file')
     
     B = np.array(list(filter(lambda x: get_param(x, p.calculator, 'B'), fl))[-1].strip().split(':')[-1].split(), dtype=float)
     b = np.linalg.norm(B)
@@ -74,7 +79,7 @@ def get_conf_parameters(conf, number, p, time, temp, log) -> None:
         'time' : time,                          #   elapsed time [sec] 
     }
 
-    return None
+    return True
 
 
 

@@ -51,3 +51,13 @@ def read_ensemble(file, charge, multiplicity, log) -> list:
     return confs
 
 
+def save_snapshot(output, confs, log):
+
+    log.debug('Saving snapshot of the ensemble')
+    with open(output, 'w') as f:
+        for i in confs:
+            f.write(f'{i.write_xyz()}\n')
+
+    return None
+
+
