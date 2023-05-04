@@ -1,0 +1,6 @@
+[tool.autopep8]
+ignore = "E203"
+max-line-length = 81
+
+[tool.black]
+line-length = 81

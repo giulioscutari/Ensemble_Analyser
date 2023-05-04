@@ -1,11 +1,11 @@
-
-
-import re, os
+import re
+import os
 import numpy as np
 from ensemble_analyser.regex_parsing import regex_parsing
 from ensemble_analyser.rrho import free_gibbs_energy
 
 EH_TO_KCAL = 627.5096080305927
+
 
 def get_param(x, calculator, param):
     """
@@ -20,15 +20,31 @@ def get_freq(fl, calc):
     Parsing for frequencies
     """
 
-    fl = '\n'.join(''.join(fl).split(regex_parsing[calc]['s_freq'])[-1].strip().splitlines()[4:]).split(regex_parsing[calc]['e_freq'])[0].strip().splitlines()
-    freq = np.array([float(i.split()[regex_parsing[calc]['idx_freq']]) for i in fl if float(i.split()[regex_parsing[calc]['idx_freq']]) != 0.0 ])
+    fl = (
+        "\n".join(
+            "".join(fl)
+            .split(regex_parsing[calc]["s_freq"])[-1]
+            .strip()
+            .splitlines()[4:]
+        )
+        .split(regex_parsing[calc]["e_freq"])[0]
+        .strip()
+        .splitlines()
+    )
+    freq = np.array(
+        [
+            float(i.split()[regex_parsing[calc]["idx_freq"]])
+            for i in fl
+            if float(i.split()[regex_parsing[calc]["idx_freq"]]) != 0.0
+        ]
+    )
     return freq
 
 
 def get_conf_parameters(conf, number, p, time, temp, log) -> bool:
     """
     Obtain the parameters for a conformer: E, G, B, m
-    
+
     conf | Conformer : conformer
     number | int : protocol number
     p | Protocol : protocol executed
@@ -39,53 +55,66 @@ def get_conf_parameters(conf, number, p, time, temp, log) -> bool:
     return | bool : calculation ended correctly and not crashed due to server error
     """
 
-    with open(os.path.join(conf.folder, f'protocol_{number}.out')) as f:
-        fl = f.readlines() 
+    with open(os.path.join(conf.folder, f"protocol_{number}.out")) as f:
+        fl = f.readlines()
 
-    try: 
-        e = float(list(filter(lambda x: get_param(x, p.calculator, 'E'), fl))[-1].strip().split()[-1])    
+    try:
+        e = float(
+            list(filter(lambda x: get_param(x, p.calculator, "E"), fl))[-1]
+            .strip()
+            .split()[-1]
+        )
     except Exception as e:
         log.error(e)
         return False
-    
+
     freq = np.array([])
     if p.freq:
         freq = get_freq(fl, p.calculator) * p.freq_fact
         if freq.size == 0:
-            log.error(('\n'.join(fl[-6:])).strip())
-            log.critical(f"{'='*20}\nCRITICAL ERROR\n{'='*20}\nNo frequency present in the calculation output.\n{'='*20}\nExiting\n{'='*20}\n")
-            raise IOError('No frequency in the output file')
-    
-    B = np.array(list(filter(lambda x: get_param(x, p.calculator, 'B'), fl))[-1].strip().split(':')[-1].split(), dtype=float)
+            log.error(("\n".join(fl[-6:])).strip())
+            log.critical(
+                f"{'='*20}\nCRITICAL ERROR\n{'='*20}\nNo frequency present in the calculation output.\n{'='*20}\nExiting\n{'='*20}\n"
+            )
+            raise IOError("No frequency in the output file")
+
+    B = np.array(
+        list(filter(lambda x: get_param(x, p.calculator, "B"), fl))[-1]
+        .strip()
+        .split(":")[-1]
+        .split(),
+        dtype=float,
+    )
     b = np.linalg.norm(B)
 
-    M = np.linalg.norm(np.array(list(filter(lambda x: get_param(x, p.calculator, 'm'), fl))[-1].strip().split(':')[-1].split(), dtype=float))
+    M = np.linalg.norm(
+        np.array(
+            list(filter(lambda x: get_param(x, p.calculator, "m"), fl))[-1]
+            .strip()
+            .split(":")[-1]
+            .split(),
+            dtype=float,
+        )
+    )
 
-    g = ''
+    g = ""
     if freq.size > 0:
         g = free_gibbs_energy(
-            SCF = e, T = temp, freq=freq, 
-            mw=conf.weight_mass, 
-            B = B,
-            m=conf.mult
-            )
-
+            SCF=e, T=temp, freq=freq, mw=conf.weight_mass, B=B, m=conf.mult
+        )
 
     conf.energies[str(number)] = {
-        'E' : e * EH_TO_KCAL if e else e,    #   Electronic Energy [kcal/mol]
-        'G' : g * EH_TO_KCAL if g else None, #   Free Gibbs Energy [kcal/mol]
-        'B' : b if b else None,                 #   Rotatory Constant [cm-1]
-        'm' : M if M else None,                 #   dipole momenti [Debye]
-        'time' : time,                          #   elapsed time [sec] 
+        "E": e * EH_TO_KCAL if e else e,  # Electronic Energy [kcal/mol]
+        "G": g * EH_TO_KCAL if g else None,  # Free Gibbs Energy [kcal/mol]
+        "B": b if b else None,  # Rotatory Constant [cm-1]
+        "m": M if M else None,  # dipole momenti [Debye]
+        "time": time,  # elapsed time [sec]
     }
 
     return True
 
 
-
-
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     # from logger import create_log
 
     # class Conf:
@@ -101,6 +130,6 @@ if __name__ == '__main__':
     # get_conf_parameters(c, 0, 1, 298.15, log)
     # print(c.energies)
 
-    with open('files/opt.out') as f:
+    with open("files/opt.out") as f:
         fl = f.readlines()
     get_freq(fl)
