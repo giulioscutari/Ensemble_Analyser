@@ -69,7 +69,8 @@ def parser_arguments():
     input_group.add_argument(
         "-e",
         "--ensemble",
-        help="The ensemble file. Could be an xyz file (preferably) or other type parsable by OpenBabel",
+        help="The ensemble file. Could be an xyz file (preferably) or other type"
+        " parsable by OpenBabel",
         required=("--restart" not in sys.argv),
     )
     input_group.add_argument(

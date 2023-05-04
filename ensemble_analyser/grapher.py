@@ -158,12 +158,12 @@ class Graph:
         ]
 
     @staticmethod
-    def gaussian(x, ev, I, sigma) -> np.array:
+    def gaussian(x, ev, intensity, sigma) -> np.array:
         """
         Create a gaussian convolution for each impulse
 
         ev | float : energy of the impulse
-        I | float : intensity of the impulse (Fosc for UV, R(vel) for ECD)
+        intensity | float : intensity of the impulse (Fosc for UV, R(vel) for ECD)
         sigma | float : sigma of the gaussian distribution
 
         I/(σ*sqrt(2π)) * exp(-1/2*((x-ev)/σ)^2)
@@ -171,7 +171,7 @@ class Graph:
         return | np.array : Gaussian of the impulse
         """
         return (
-            I
+            intensity
             / (sigma * np.sqrt(2 * np.pi))
             * np.exp(-0.5 * ((x - ev) / sigma) ** 2)
         )

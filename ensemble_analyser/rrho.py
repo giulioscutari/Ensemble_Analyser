@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.constants import R, h, c, Boltzmann, N_A
+from scipy.constants import h, c, Boltzmann, N_A
 from scipy.constants import physical_constants
 
 
