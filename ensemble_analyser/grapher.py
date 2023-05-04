@@ -1,5 +1,7 @@
 import numpy as np
 import os
+from scipy.integrate import trapezoid
+import scipy.optimize as opt
 from scipy.constants import c, h, electron_volt, R
 import matplotlib.pyplot as plt
 
@@ -11,15 +13,13 @@ FACTOR_EV_NM = h*c/(10**-9*electron_volt)
 
 class Graph:
 
-    def __init__(self, confs, protocol, log, T, uv_ref = '', ecd_ref = '', final_lambda = 800., definition=4):
+    def __init__(self, confs, protocol, log, T, final_lambda = 800., definition=4):
         """
         
         confs | list : whole ensemble list
         protocol | Protocol : protocol that calculates the electronic spectra 
         log : logger instance
         T | float : temperature [K]
-        uv_ref | str : UV experimental graph
-        ecd_ref | str : ECD experimental grpah
         final_lambda | float : last wavelength to convolute the spectra
         definition | int : number of point for the wavelength interval
         """
@@ -30,7 +30,7 @@ class Graph:
         self.pop = self.calc_pop(T)
         self.log.debug(self.pop)
 
-        self.x = np.linspace(FACTOR_EV_NM/1, FACTOR_EV_NM/(final_lambda), 10**definition) # eV x axis
+        self.x = np.linspace(FACTOR_EV_NM/100, FACTOR_EV_NM/(final_lambda), 10**definition) # eV x axis
 
         self.spectra = []
         self.filter_outputs()
@@ -39,12 +39,18 @@ class Graph:
         self.uv_impulses = [self.get_uv(i) for i in self.spectra]
         self.ecd_impulses = [self.get_ecd(i) for i in self.spectra]
 
+        if os.path.exists(os.path.join(os.getcwd(), 'ecd_ref.dat')):
+            ecd = self.auto_convolution(os.path.join(os.getcwd(), 'ecd_ref.dat'), impulses=self.ecd_impulses, fname=f"ecd_protocol_{self.protocol.number}_auto_conv.dat") 
+        else:
+            ecd = self.calc_graph(impulses=self.ecd_impulses, sigma=1/3, fname=f"ecd_protocol_{self.protocol.number}.dat", save=True)
+        
+        if os.path.exists(os.path.join(os.getcwd(), 'uv_ref.dat')):
+            uv = self.auto_convolution(os.path.join(os.getcwd(), 'uv_ref.dat'), impulses=self.ecd_impulses, fname=f"uv_protocol_{self.protocol.number}_auto_conv.dat") 
+        else:
+            uv = self.calc_graph(impulses=self.ecd_impulses, sigma=1/3, fname=f"uv_protocol_{self.protocol.number}.dat", save=True)
 
-        uv = self.calc_graph(impulses=self.uv_impulses, sigma=1/3, fname=        f"uv_protocol_{self.protocol.number}.dat", save=True)
-        ecd = self.calc_graph(impulses=self.ecd_impulses, sigma=1/3, fname=        f"ecd_protocol_{self.protocol.number}.dat", save=True)
-
-        Graph.damp_graph(f'uv_protocol_{self.protocol.number}.dat', self.x, uv)
         Graph.damp_graph(f'ecd_protocol_{self.protocol.number}.dat', self.x, ecd)
+        Graph.damp_graph(f'uv_protocol_{self.protocol.number}.dat', self.x, uv)
         
 
     def filter_outputs(self) -> None:
@@ -89,8 +95,8 @@ class Graph:
 
         return [(FACTOR_EV_NM/float(i.strip().split()[regex_parsing[self.protocol.calculator]['idx_en_ECD']]), float(i.strip().split()[regex_parsing[self.protocol.calculator]['idx_imp_ECD']])) for i in graph.splitlines() if i]
 
-
-    def gaussian(self, x, ev, I, sigma) -> np.array:
+    @staticmethod
+    def gaussian(x, ev, I, sigma) -> np.array:
         """
         Create a gaussian convolution for each impulse 
 
@@ -140,15 +146,75 @@ class Graph:
 
         return pop
 
-
-    def calc_graph(self, impulses, sigma, fname = '', save=False):
+    
+    def auto_convolution(self, fname_ref, impulses, fname, norm=1) -> np.array:
         """
-        Build the UV spectra 
+        Optimization to find the best fitting values for the Gaussian convolution.
+        Optimization "Fitness Function" is the sum of the absolute value of the differences between the computed and the experimental graph that lay above the threshold.
+
+        fname_ref | str : filename of the reference file
+        impulses | np.array((eV, I)) : list of single excitation [eV, I] where I can be a UV or ECD excitation
+        fname | str : filename to save the final convoluted graph
+
+        return | np.array : normalized graph
+        """
+        
+        ref = Ref_graph(fname_ref, None)
+        x_min, x_max = ref.x_min, ref.x_max
+        ref.y = Graph.normalise(ref.y, norm=norm)
+        # area_ref = trapezoid(a.y, a.x)
+
+        # resampling the experimental data, in order to fetch the x_exp.size
+        X = self.x.copy()
+        Y_exp_interp = np.interp(X, ref.x, ref.y, left=0, right=0)
+
+
+        def optimiser(variables):
+            """
+            Callback for the scipy.optimize.minimize
+            """
+            sigma, shift, threshold = variables       
+            Y_comp = Graph.normalise(self.calc_graph(impulses=impulses, shift=shift, sigma=sigma, save=False), norm=norm)
+            graphs[len(graphs)] = Y_comp
+            
+            # different with threshold
+            y = np.abs(Y_comp - Y_exp_interp)
+            diff = np.sum(y[np.where((y>0) & (y>threshold))])
+
+            # exp = np.array([[x,y] for x, y in zip(X, Y_exp_interp)])
+            # comp = np.array([[x,y] for x, y in zip(X, Y_comp)])
+
+            # diff_area_pos = trapezoid(exp[exp[:, 1]>0][:, 0], exp[exp[:, 1]>0][:, 1]) - trapezoid(comp[comp[:, 1]>0][:, 0], comp[comp[:, 1]>0][:, 1])
+            # diff_area_neg = trapezoid(exp[exp[:, 1]<0][:, 0], exp[exp[:, 1]<0][:, 1]) - trapezoid(comp[comp[:, 1]<0][:, 0], comp[comp[:, 1]<0][:, 1])
+            # diff = (diff_area_pos*trapezoid(exp[exp[:, 1]>0][:, 0], exp[exp[:, 1]>0][:, 1])) + diff_area_neg*trapezoid(exp[exp[:, 1]<0][:, 0], exp[exp[:, 1]<0][:, 1])/ (trapezoid(exp[exp[:, 1]>0][:, 0], exp[exp[:, 1]>0][:, 1]) + trapezoid(exp[exp[:, 1]<0][:, 0], exp[exp[:, 1]<0][:, 1]) )
+
+            # print(sigma, shift, threshold, diff)
+            return diff
+
+
+        confidence = 0.01
+        initial_guess = [.4, -1, confidence]
+        result = opt.minimize(optimiser, initial_guess, bounds=[(1/3, 0.8), (-2, 2), (0.01, 0.01)])
+        if result.success:
+            sigma, shift, thr = result.x
+            self.log.info(f'Convergence of parameters succeeded within a threshold of {thr:.2f}u.a. for the ∆ε. Confidence level: {(1-result.fun/(2*X.size))*100:.2f}%. Parameters obtained\n\t- σ = {sigma:.4f} eV (that correspond to a FWHM = {(sigma*np.sqrt(2*np.log(2))*2):.4f} eV\n\t- Δ = {shift:.4f} eV (in this case, a negative shift corresponds to a RED-shift)')
+            Y_COMP = Graph.normalise(self.calc_graph(impulses=impulses, shift=shift, sigma=sigma, save=True, fname=fname), norm=norm)
+        else:
+            self.log.info(f'Convergence of parameters NOT succeeded within a threshold of {thr:.2f}u.a. for the ∆ε. Parameters used to convolute the saved graph\n\t- σ = {initial_guess[0]:.4f} eV (that correspond to a FWHM = {(initial_guess[0]*np.sqrt(2*np.log(2))*2):.4f} eV\n\t- Δ = 0.0000 eV')
+            Y_COMP = Graph.normalise(self.calc_graph(impulses=impulses, shift=0, sigma=initial_guess[0], save=True, fname=fname), norm=norm)
+
+        return Y_COMP
+
+
+    def calc_graph(self, impulses, sigma, shift = 0, fname = '', save=False):
+        """
+        Build the Spectra 
 
         impulses | list(tuple) : list of the (eV, I)s for each root of each conformer
         sigma | float : dispersion for the gaussian convolution [eV]
         fname | str : the name of the file to store the graph
         save | bool : save the .dat file for each conformer
+
         return | np.array (1D array) : Convoluted and weighted spectra
         """
         
@@ -158,7 +224,7 @@ class Graph:
         for idx in range(len(self.confs)):
             y_ = np.zeros(x.shape)
             for ev, I in impulses[idx]:
-                y_ += self.gaussian(x, ev, I, sigma)
+                y_ += Graph.gaussian(x+shift, ev, I, sigma)
 
             if save: Graph.damp_graph(
                         fname = os.path.join(os.getcwd(), self.confs[idx].folder, fname), 
@@ -168,6 +234,8 @@ class Graph:
             y += self.pop[idx] * y_
 
         return y
+
+
 
 
     @staticmethod
@@ -193,7 +261,8 @@ class Graph:
         return arr[:, 0], arr[:, 1]
     
 
-    def normalise(self, y, norm=1) -> np.array: 
+    @staticmethod
+    def normalise(y, norm=1) -> np.array: 
         """
         Normalize an ensemble between 1 and -1, if not set otherwise.
 
@@ -204,3 +273,122 @@ class Graph:
         """
         return y / (np.max([np.max(y), np.min(y) * (-1 if np.min(y)<0 else 1)])) * norm 
     
+
+
+
+
+class Ref_graph:
+
+    def __init__(self, fname, log, is_ev : bool = False):
+
+        data = np.loadtxt(fname, dtype=float)
+        self.x = data[:, 0] if is_ev else FACTOR_EV_NM/data[:, 0]
+        self.y = data[:, 1]
+
+        self.log = log
+    
+    def integral(self) -> float: 
+        """
+        Calculate the area subtended by the curve
+         
+        return | float
+        """
+
+        return trapezoid(self.y, self.x)
+    
+    @property
+    def x_min(self):
+        return min(self.x)
+    
+    @property
+    def x_max(self):
+        return max(self.x)
+    
+
+
+class Test_Graph: 
+
+    def __init__(self, fname):
+
+        data = np.loadtxt(fname, dtype=float)
+        self.x = np.linspace(FACTOR_EV_NM/100, FACTOR_EV_NM/(800), 10**5) # eV x axis
+        self.eV = FACTOR_EV_NM/data[:, 0]
+        self.imp = data[:, 1]
+        # self.y = Graph.normalise(self.y)
+
+    def calc_graph(self, shift, sigma):
+
+        x = self.x.copy()
+        y = np.zeros(x.shape)
+
+        y_ = np.zeros(x.shape)
+        for ev, I in zip(self.eV, self.imp):
+            y_ += Graph.gaussian(x, ev+shift, I, sigma)
+        y += y_
+
+        return y
+    
+
+
+
+
+if __name__ == '__main__':
+    import scipy.optimize as opt
+
+
+    os.chdir('ensemble_analyser')
+
+    a = Ref_graph('../files/ecd_ref.txt', None)
+    x_min, x_max = a.x_min, a.x_max
+    a.y = Graph.normalise(a.y)
+    # area_ref = trapezoid(a.y, a.x)
+
+    # resampling the experimental data, in order to fetch the x_exp.size
+    X = np.linspace(FACTOR_EV_NM/100, FACTOR_EV_NM/(800), 10**5)
+
+    Y_exp_interp = np.interp(X, a.x, a.y, left=0, right=0)
+
+
+    computed = Test_Graph('../files/impulse.dat')
+
+    graphs= {}
+    def optimiser(variables):
+        sigma, shift, threshold = variables       
+        Y_comp = Graph.normalise(computed.calc_graph(shift, sigma))
+        graphs[len(graphs)] = Y_comp
+        
+        # different with threshold
+        y = np.abs(Y_comp - Y_exp_interp)
+        diff = np.sum(y[np.where((y>0) & (y>threshold))])
+
+        exp = np.array([[x,y] for x, y in zip(X, Y_exp_interp)])
+        comp = np.array([[x,y] for x, y in zip(X, Y_comp)])
+
+
+        # diff_area_pos = trapezoid(exp[exp[:, 1]>0][:, 0], exp[exp[:, 1]>0][:, 1]) - trapezoid(comp[comp[:, 1]>0][:, 0], comp[comp[:, 1]>0][:, 1])
+        # diff_area_neg = trapezoid(exp[exp[:, 1]<0][:, 0], exp[exp[:, 1]<0][:, 1]) - trapezoid(comp[comp[:, 1]<0][:, 0], comp[comp[:, 1]<0][:, 1])
+        # diff = (diff_area_pos*trapezoid(exp[exp[:, 1]>0][:, 0], exp[exp[:, 1]>0][:, 1])) + diff_area_neg*trapezoid(exp[exp[:, 1]<0][:, 0], exp[exp[:, 1]<0][:, 1])/ (trapezoid(exp[exp[:, 1]>0][:, 0], exp[exp[:, 1]>0][:, 1]) + trapezoid(exp[exp[:, 1]<0][:, 0], exp[exp[:, 1]<0][:, 1]) )
+
+        print(sigma, shift, threshold, diff)
+        return diff
+
+
+    confidence = 0.01
+    initial_guess = [.4, -1, confidence]
+    result = opt.minimize(optimiser, initial_guess, bounds=[(1/3, 0.8), (-2, 2), (0.01, 0.01)])#, method='Nelder-Mead')
+    if result.success:
+        print((result.x), result.fun, (1-result.fun/(2*X.size))*100)
+    else:
+        print('NO')
+
+    sigma, shift, thr = result.x
+
+    plt.plot(X, Y_exp_interp)
+    plt.fill_between(X, Y_exp_interp-confidence, Y_exp_interp+confidence, alpha=0.2)
+    for i in graphs: 
+        plt.plot(X, graphs[i], '--', alpha=0.4)
+
+    plt.plot(X, Graph.normalise(computed.calc_graph(shift, sigma)))
+    plt.show()
+
+

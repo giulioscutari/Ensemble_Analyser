@@ -10,7 +10,7 @@ regex_parsing = {
 State   Energy    Wavelength   fosc        P2         PX        PY        PZ  
         (cm-1)      (nm)                 (au**2)     (au)      (au)      (au) 
 -----------------------------------------------------------------------------''',
-        's_ECD' : '''CD SPECTRUM VIA TRANSITION VELOCITY DIPOLE MOMENTS        
+        's_ECD' : '''CD SPECTRUM
 -------------------------------------------------------------------
 State  Energy     Wavelength     R         MX        MY        MZ   
        (cm-1)       (nm)     (1e40*cgs)   (au)      (au)      (au)  
