@@ -4,3 +4,6 @@ max-line-length = 81
 
 [tool.black]
 line-length = 81
+
+[tool.pytest.ini_options]
+testpaths = ["ensemble_analyzer",]

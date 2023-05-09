@@ -1,12 +1,12 @@
-from ensemble_analyser.conformer import Conformer
-from ensemble_analyser.ioFile import read_ensemble, save_snapshot
-from ensemble_analyser.logger import create_log, ordinal
-from ensemble_analyser.parser_arguments import parser_arguments
-from ensemble_analyser.parser_parameter import get_conf_parameters
-from ensemble_analyser.IOsystem import SerialiseEncoder
-from ensemble_analyser.protocol import Protocol, load_protocol
-from ensemble_analyser.pruning import calculate_rel_energies, check_ensemble
-from ensemble_analyser.grapher import Graph
+from src.conformer import Conformer
+from src.ioFile import read_ensemble, save_snapshot
+from src.logger import create_log, ordinal
+from src.parser_arguments import parser_arguments
+from src.parser_parameter import get_conf_parameters
+from src.IOsystem import SerialiseEncoder
+from src.protocol import Protocol, load_protocol
+from src.pruning import calculate_rel_energies, check_ensemble
+from src.grapher import Graph
 
 import ase
 import time

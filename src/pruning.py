@@ -2,10 +2,10 @@ from ase.build import minimize_rotation_and_translation
 from scipy.constants import R
 from tabulate import tabulate
 import numpy as np
-from ensemble_analyser.ioFile import save_snapshot
+from src.ioFile import save_snapshot
 
 
-from ensemble_analyser.logger import DEBUG, ordinal
+from src.logger import DEBUG, ordinal
 
 
 def cut_over_thr_max(confs: list, thrGMAX: float, log) -> list:

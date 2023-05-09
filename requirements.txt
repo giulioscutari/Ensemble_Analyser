@@ -1,3 +1,7 @@
+autopep8
+black
+coverage
+mock
 numpy
 scipy
 tabulate

@@ -6,7 +6,7 @@ from scipy.constants import c, h, electron_volt, R
 import matplotlib.pyplot as plt
 
 
-from ensemble_analyser.regex_parsing import regex_parsing
+from src.regex_parsing import regex_parsing
 
 FACTOR_EV_NM = h * c / (10**-9 * electron_volt)
 

@@ -1,5 +1,5 @@
-from ensemble_analyser.IOsystem import _parse_xyz_str
-from ensemble_analyser.conformer import Conformer
+from src.IOsystem import _parse_xyz_str
+from src.conformer import Conformer
 
 import os
 

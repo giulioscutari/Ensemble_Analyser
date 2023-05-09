@@ -1,4 +1,4 @@
-from ensemble_analyser.IOsystem import mkdir
+from src.IOsystem import mkdir
 
 import numpy as np
 from ase.atoms import Atoms

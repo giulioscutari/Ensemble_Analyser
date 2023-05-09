@@ -1,8 +1,8 @@
 import re
 import os
 import numpy as np
-from ensemble_analyser.regex_parsing import regex_parsing
-from ensemble_analyser.rrho import free_gibbs_energy
+from src.regex_parsing import regex_parsing
+from src.rrho import free_gibbs_energy
 
 EH_TO_KCAL = 627.5096080305927
 
